@@ -780,7 +780,86 @@ c.fillStyle=&#39;#a8d8ea&#39;;c.fill();c.restore();
 " allow="gyroscope; accelerometer" allowfullscreen></iframe><script>(function(){var b=document.getElementById("wpadminbar");if(b){var f=document.getElementById("areen-frame");f.style.top=b.offsetHeight+"px";f.style.height="calc(100% - "+b.offsetHeight+"px)";}})()</script>
 
 <!-- ===================== ENZO4 INTEGRATION START ===================== -->
-<!DOCTYPE html>
+<style>
+#enzo4-launch-btn {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 100000;
+  background: rgba(16, 20, 28, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  padding: 10px 14px;
+  font: 600 12px/1.2 Arial, sans-serif;
+  letter-spacing: 0.7px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#enzo4-launch-btn:hover { background: rgba(32, 38, 52, 0.95); }
+#enzo4-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  background: rgba(0, 0, 0, 0.88);
+  display: none;
+}
+#enzo4-modal.open { display: block; }
+#enzo4-shell {
+  position: absolute;
+  left: 4vw;
+  top: 6vh;
+  width: 92vw;
+  height: 88vh;
+  background: #0b0d12;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 10px;
+  overflow: hidden;
+}
+#enzo4-title {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  z-index: 3;
+  font: 700 12px/1 Arial, sans-serif;
+  color: #cfd8ff;
+  letter-spacing: 1px;
+}
+#enzo4-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 3;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 8px 10px;
+  font: 700 11px/1 Arial, sans-serif;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#enzo4-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #000;
+}
+</style>
+
+<button id="enzo4-launch-btn" type="button" title="Open Enzo4 mode">Open ENZO4</button>
+
+<div id="enzo4-modal" aria-hidden="true">
+  <div id="enzo4-shell">
+    <div id="enzo4-title">ENZO4 PARTNER MODULE</div>
+    <button id="enzo4-close" type="button">Close [Esc]</button>
+    <iframe id="enzo4-frame" title="ENZO4 Module" loading="lazy"></iframe>
+  </div>
+</div>
+
+<script type="text/plain" id="enzo4-embedded-html">
+<!-- ===================== ENZO4 FULL FILE EMBED START ===================== --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1059,6 +1138,8 @@ input {
 </style>
 </head>
 <body>
+  <!-- ===================== ENZO4 PARTNER ZONE START ===================== -->
+  <!-- Partner-safe area: your teammate can work in this file without touching the ice-skate game. -->
 <div class="screen">
   <h1>Magic Math Battle</h1>
   <p class="subtitle">
@@ -1151,6 +1232,7 @@ input {
 </div>
 
 <script>
+/* ===================== ENZO4 PARTNER ZONE (JS) START ===================== */
 const spellPool = [
   { id: "spark", name: "Spark Shot", rarity: "Common", minLevel: 1, baseDamage: 3, crit: 3, lifesteal: 0, vitality: 0, power: 0, ward: 1, focus: 0, text: "A reliable starter spell with a little ward." },
   { id: "ember", name: "Ember Burst", rarity: "Common", minLevel: 1, baseDamage: 6, crit: 4, lifesteal: 0, vitality: 0, power: 1, ward: 0, focus: 0, text: "A hot card that adds steady damage." },
@@ -1737,7 +1819,8 @@ renderEnemyStats();
 renderSpellBook();
 updateHealthBars();
 generateQuestion();
-</script>
+<\/script>
+<!-- ===================== ENZO4 PARTNER ZONE END ===================== -->
 </body>
 </html>
 <!-- ===================== ENZO4 FULL FILE EMBED END ===================== -->
