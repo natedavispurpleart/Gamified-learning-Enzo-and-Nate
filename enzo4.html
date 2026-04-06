@@ -1,1 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic Math Battle</title>
+<style>
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  text-align: center;
+  background: linear-gradient(180deg, #b7e3ff 0%, #d8f1b8 46%, #8cbf67 100%);
+  color: #1f2937;
+}
+
+.screen {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 16px 44px;
+}
+
+h1 {
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  max-width: 760px;
+  margin: 0 auto 24px;
+  color: #334155;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.buttons button,
+.spell-button,
+.reward-choice,
+.cast-button {
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.buttons button.selected-toggle {
+  background: linear-gradient(180deg, #facc15, #eab308);
+  color: #1f2937;
+  border-color: #92400e;
+}
+
+.buttons button,
+.cast-button {
+  background: linear-gradient(180deg, #4f8df5, #295ec7);
+  border: 2px solid #163f8c;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.buttons button:hover,
+.spell-button:hover,
+.reward-choice:hover,
+.cast-button:hover {
+  filter: brightness(1.08);
+}
+
+.game-area {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(320px, 1fr) minmax(280px, 320px);
+  gap: 18px;
+  align-items: start;
+}
+
+.panel {
+  width: auto;
+  padding: 20px;
+  background: #f8f1d0;
+  border: 4px solid #1e293b;
+  border-radius: 18px;
+  box-shadow: 0 8px 0 rgba(15, 23, 42, 0.18);
+}
+
+.panel.hit-panel {
+  animation: panelShake 0.24s ease;
+}
+
+.panel.crit-panel {
+  animation: critFlash 0.3s ease;
+}
+
+.wide-panel {
+  width: auto;
+}
+
+.card-container {
+  perspective: 1000px;
+  margin-top: 16px;
+}
+
+.card {
+  width: 100%;
+  height: 360px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.22s;
+}
+
+.card.flip {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.front {
+  background: linear-gradient(180deg, #fffef4, #dde8ff);
+  border: 4px solid #1e293b;
+}
+
+.back {
+  background: linear-gradient(180deg, #fff4cf, #ffd6a5);
+  border: 4px solid #1e293b;
+  transform: rotateY(180deg);
+}
+
+.enemy-card {
+  background: linear-gradient(180deg, #fffef4, #ffe1d6);
+  min-height: 220px;
+  border: 4px solid #1e293b;
+}
+
+.health-bar {
+  width: 100%;
+  height: 16px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 2px solid #1e293b;
+}
+
+.health-fill {
+  height: 100%;
+  width: 100%;
+  transition: width 0.35s ease;
+}
+
+#playerHealth {
+  background: linear-gradient(90deg, #22c55e, #86efac);
+}
+
+#enemyHealth {
+  background: linear-gradient(90deg, #ef4444, #fb7185);
+}
+
+.info,
+.stat-list {
+  margin-top: 14px;
+  line-height: 1.7;
+}
+
+.stat-list {
+  text-align: left;
+  background: #fffaf0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 3px solid #1e293b;
+}
+
+.stat-list strong {
+  color: #1d4ed8;
+}
+
+.question {
+  font-size: 1.45rem;
+  margin: 14px 0 10px;
+}
+
+input {
+  width: 100%;
+  max-width: 180px;
+  padding: 10px;
+  margin: 10px 0 12px;
+  border-radius: 8px;
+  border: 3px solid #1e293b;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.spell-book {
+  margin-top: 28px;
+  text-align: left;
+}
+
+.spell-grid,
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.spell-button,
+.reward-choice {
+  text-align: left;
+  background: linear-gradient(180deg, #fffef5, #dbeafe);
+  border: 3px solid #1e293b;
+  color: #1f2937;
+  box-shadow: 0 6px 0 rgba(30, 41, 59, 0.12);
+}
+
+.spell-button.selected {
+  border-color: #eab308;
+  box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.22);
+}
+
+.reward-choice {
+  background: linear-gradient(180deg, #fff7ed, #fde68a);
+}
+
+.card-title {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.card-rarity {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: #b45309;
+}
+
+.card-meta {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.status {
+  min-height: 24px;
+  margin-top: 16px;
+  color: #1d4ed8;
+  font-weight: bold;
+}
+
+.combat-feed {
+  min-height: 28px;
+  margin-top: 10px;
+  font-size: 0.94rem;
+  color: #7c2d12;
+  font-weight: bold;
+}
+
+.reward-panel {
+  display: none;
+  margin: 28px auto 0;
+  padding: 18px;
+  max-width: 980px;
+  background: #f8f1d0;
+  border: 4px solid #1e293b;
+  border-radius: 18px;
+  box-shadow: 0 8px 0 rgba(15, 23, 42, 0.18);
+}
+
+.reward-panel.show {
+  display: block;
+}
+
+.hint {
+  color: #475569;
+  font-size: 0.92rem;
+}
+
+.battle-panel {
+  background: linear-gradient(180deg, #d8f8ff 0%, #b5e48c 100%);
+}
+
+@media (max-width: 980px) {
+  .game-area {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes panelShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-4px); }
+}
+
+@keyframes critFlash {
+  0% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
+  40% { box-shadow: 0 0 22px rgba(250, 204, 21, 0.95); }
+  100% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
+}
+</style>
+</head>
+<body>
+<div class="screen">
+  <h1>Magic Math Battle</h1>
+  <p class="subtitle">
+    Draft enchanted cards after each victory, drink rare stat potions, and cut through enemies in a fast fantasy duel.
+  </p>
+
+  <div class="buttons" id="mathDifficultyButtons">
+    <button onclick="chooseMathDifficulty('easy')" id="math-easy">Math Easy</button>
+    <button onclick="chooseMathDifficulty('normal')" id="math-normal" class="selected-toggle">Math Normal</button>
+    <button onclick="chooseMathDifficulty('hard')" id="math-hard">Math Hard</button>
+  </div>
+
+  <div class="buttons">
+    <button onclick="chooseLevel(1)">Level 1</button>
+    <button onclick="chooseLevel(2)">Level 2</button>
+    <button onclick="chooseLevel(3)">Level 3</button>
+    <button onclick="chooseLevel(4)">Level 4</button>
+    <button onclick="chooseLevel(5)">Level 5</button>
+  </div>
+
+  <div class="game-area">
+    <div class="panel" id="playerPanel">
+      <h2>Mage</h2>
+      <div class="health-bar"><div class="health-fill" id="playerHealth"></div></div>
+      <div id="playerHPText">HP: 180 / 180</div>
+      <div class="stat-list" id="playerStatsPanel"></div>
+
+      <div class="card-container">
+        <div class="card" id="playerCard">
+          <div class="card-face front">
+            <h3 id="activeSpellName">Choose a spell</h3>
+            <div id="question" class="question">Pick a level and a spell card</div>
+            <input id="answer" type="number" placeholder="Answer">
+            <button class="cast-button" onclick="submitAnswer()">Cast Spell</button>
+            <button class="cast-button" onclick="toggleHint()" style="margin-top: 8px;">Hint / Steps</button>
+            <p class="hint">Selected spell damage: <span id="spellDamage">0</span></p>
+            <div class="stat-list" id="hintPanel" style="display: none; margin-top: 10px;"></div>
+          </div>
+          <div class="card-face back">
+            <h3 id="result">Your magic gathers...</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="info">
+        Math Mode: <span id="mathMode">Normal</span><br>
+        Level: <span id="level">-</span><br>
+        Battle: <span id="battleCount">1</span><br>
+        Score: <span id="score">0</span><br>
+        Cards Earned: <span id="cardsEarned">1</span>
+      </div>
+    </div>
+
+    <div class="panel battle-panel" id="enemyPanel">
+      <h2>Dark Foe</h2>
+      <div class="card-face enemy-card" style="position: relative; inset: auto;">
+        <h3 id="enemyName">Goblin Scout</h3>
+        <p id="enemyFlavor">A sneaky foe blocks your path.</p>
+        <div class="stat-list" id="enemyStatsPanel"></div>
+      </div>
+      <div class="health-bar"><div class="health-fill" id="enemyHealth"></div></div>
+      <div id="enemyHPText">HP: 150 / 150</div>
+      <div id="enemyAttackText" class="hint">Enemy attack: 10</div>
+      <div id="enemyIntentText" class="hint">Intent: Testing strike</div>
+      <p class="status" id="statusText">Defeat this enemy to draft one of three spell cards.</p>
+      <div class="combat-feed" id="combatFeed">Battle magic crackles in the air.</div>
+    </div>
+
+    <div class="panel wide-panel">
+      <h2>Arcane Notes</h2>
+      <div class="stat-list">
+        <div><strong>Permanent Mage Stats</strong> come from every card and potion blessing you keep.</div>
+        <div><strong>Power</strong> raises all spell damage.</div>
+        <div><strong>Ward</strong> lowers reflected damage and enemy hits.</div>
+        <div><strong>Focus</strong> improves critical spell bursts.</div>
+        <div><strong>Vitality</strong> increases max HP for the whole run.</div>
+        <div><strong>Lifesteal</strong> heals you on correct casts.</div>
+        <div><strong>Death Blessings</strong> make every new run stronger after defeat.</div>
+        <div><strong>Enemy Armor</strong> reduces spell damage.</div>
+        <div><strong>Enemy Thorns</strong> hurts you whenever you land a hit.</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="spell-book">
+    <h2>Spell Cards</h2>
+    <p class="hint">Each card has active combat stats and permanent bonuses that stay with you for the full run.</p>
+    <div class="spell-grid" id="spellGrid"></div>
+  </section>
+
+  <section class="reward-panel" id="rewardPanel">
+    <h2>Choose Your Reward</h2>
+    <p class="hint">Choose an enchanted card or occasional potion. Its blessings are added to your mage immediately.</p>
+    <div class="reward-grid" id="rewardGrid"></div>
+  </section>
+
+  <section class="reward-panel" id="deathPanel">
+    <h2>Choose A Death Blessing</h2>
+    <p class="hint">Defeat has forged your mage. Choose how your next run grows stronger.</p>
+    <div class="reward-grid" id="deathGrid"></div>
+  </section>
+
+  <section class="reward-panel" id="milestonePanel">
+    <h2>Choose A Milestone Boon</h2>
+    <p class="hint">A rare pause in the climb. Pick one lasting edge for the next stretch.</p>
+    <div class="reward-grid" id="milestoneGrid"></div>
+  </section>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const embedMode = urlParams.get("embed") === "1";
+const embedEnemyConfig = embedMode ? {
+  name: urlParams.get("enemyName") || "Arena Foe",
+  flavor: urlParams.get("enemyFlavor") || "A foe from the frozen wild steps into your path.",
+  maxHP: Number(urlParams.get("enemyHP") || 150),
+  attack: Number(urlParams.get("enemyAttack") || 10),
+  armor: Number(urlParams.get("enemyArmor") || 1),
+  thorns: Number(urlParams.get("enemyThorns") || 0),
+  fury: Number(urlParams.get("enemyFury") || 0),
+  bonusText: urlParams.get("enemyBonus") || "A summoned foe tests your spellcraft."
+} : null;
+
+const spellPool = [
+  { id: "spark", name: "Spark Shot", rarity: "Common", minLevel: 1, baseDamage: 3, crit: 3, lifesteal: 0, vitality: 0, power: 0, ward: 1, focus: 0, text: "A reliable starter spell with a little ward." },
+  { id: "ember", name: "Ember Burst", rarity: "Common", minLevel: 1, baseDamage: 6, crit: 4, lifesteal: 0, vitality: 0, power: 1, ward: 0, focus: 0, text: "A hot card that adds steady damage." },
+  { id: "moss", name: "Moss Guard", rarity: "Common", minLevel: 1, baseDamage: 2, crit: 2, lifesteal: 8, vitality: 14, power: 0, ward: 2, focus: 0, text: "A defensive card that thickens your health bar." },
+  { id: "frost", name: "Frost Sigil", rarity: "Rare", minLevel: 2, baseDamage: 7, crit: 5, lifesteal: 0, vitality: 0, power: 1, ward: 1, focus: 1, text: "Sharp ice magic for disciplined mages." },
+  { id: "storm", name: "Storm Chain", rarity: "Rare", minLevel: 3, baseDamage: 10, crit: 8, lifesteal: 0, vitality: 0, power: 2, ward: 0, focus: 2, text: "A violent chain of magic with strong crit scaling." },
+  { id: "prism", name: "Prism Bloom", rarity: "Rare", minLevel: 2, baseDamage: 5, crit: 4, lifesteal: 10, vitality: 12, power: 0, ward: 1, focus: 1, text: "Balanced magic that sustains a long run." },
+  { id: "nova", name: "Sun Nova", rarity: "Epic", minLevel: 4, baseDamage: 14, crit: 10, lifesteal: 0, vitality: 0, power: 3, ward: 0, focus: 2, text: "A radiant blast with huge burst potential." },
+  { id: "aegis", name: "Aegis Rune", rarity: "Epic", minLevel: 3, baseDamage: 6, crit: 3, lifesteal: 0, vitality: 16, power: 0, ward: 4, focus: 0, text: "Turns your deck into a shielded fortress." },
+  { id: "void", name: "Void Lantern", rarity: "Epic", minLevel: 4, baseDamage: 11, crit: 12, lifesteal: 9, vitality: 4, power: 2, ward: 0, focus: 3, text: "Aggressive arcane pressure with a risky edge." },
+  { id: "meteor", name: "Meteor Crown", rarity: "Legendary", minLevel: 5, baseDamage: 18, crit: 14, lifesteal: 0, vitality: 0, power: 4, ward: 0, focus: 3, text: "Legendary power for impossible moments." },
+  { id: "oracle", name: "Oracle Glass", rarity: "Legendary", minLevel: 4, baseDamage: 9, crit: 18, lifesteal: 14, vitality: 16, power: 1, ward: 1, focus: 4, text: "A wise relic that transforms your long-term stats." }
+];
+
+const enemyRoster = [
+  { name: "Goblin Scout", flavor: "A sneaky foe blocks your path.", maxHP: 150, attack: 10, armor: 1, thorns: 0, fury: 0, bonusText: "Light armor. Fast but flimsy." },
+  { name: "Bone Knight", flavor: "A restless warrior rises from the ruins.", maxHP: 180, attack: 12, armor: 3, thorns: 1, fury: 0, bonusText: "Heavy armor and bone spikes." },
+  { name: "Swamp Witch", flavor: "Hexes twist the air around her.", maxHP: 160, attack: 11, armor: 1, thorns: 0, fury: 2, bonusText: "Fury makes her hits surge unpredictably." },
+  { name: "Ash Drake", flavor: "Its scales glow like a dying forge.", maxHP: 190, attack: 13, armor: 2, thorns: 2, fury: 1, bonusText: "Flaming thorns punish every clean hit." },
+  { name: "Void Titan", flavor: "A towering nightmare waits at the gate.", maxHP: 220, attack: 15, armor: 4, thorns: 2, fury: 2, bonusText: "Massive armor, brutal force, no mercy." }
+];
+
+const potionPool = [
+  { id: "potion-crimson", type: "potion", name: "Crimson Vitality Draught", rarity: "Potion", health: 45, vitality: 10, power: 0, ward: 0, focus: 0, lifesteal: 0, text: "A ruby tonic that restores health and hardens your life force." },
+  { id: "potion-sage", type: "potion", name: "Sagefire Elixir", rarity: "Potion", health: 28, vitality: 0, power: 2, ward: 0, focus: 1, lifesteal: 4, text: "A glowing brew that sharpens spellwork and leaves healing sparks behind." },
+  { id: "potion-aegis", type: "potion", name: "Moonshield Philter", rarity: "Potion", health: 32, vitality: 6, power: 0, ward: 2, focus: 0, lifesteal: 0, text: "Silver dust swirls through this potion, wrapping you in a lasting ward." }
+];
+
+let level = 0;
+let score = 0;
+let currentAnswer = null;
+let currentQuestionData = null;
+let questionMisses = 0;
+let mathDifficulty = "normal";
+let currentSpellId = "spark";
+let spellLevels = { spark: 1 };
+let rewardChoices = [];
+let deathChoices = [];
+let milestoneChoices = [];
+let enemyIndex = 0;
+let potionBonuses = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0 };
+let deathBlessings = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0, deaths: 0 };
+let battleCount = 1;
+let enemyTurnCount = 0;
+let playerBarrier = 0;
+let enemyWeaken = 0;
+let nextEnemyMove = null;
+
+let basePlayerMaxHP = 180;
+let playerHP = 180;
+let maxPlayerHP = 180;
+
+let enemyHP = 150;
+let maxEnemyHP = 150;
+let enemyAttack = 10;
+let currentEnemy = enemyRoster[0];
+
+function notifyEmbedResult(result) {
+  if (!embedMode || window.parent === window) return;
+  window.parent.postMessage({
+    type: "enzo4-battle-result",
+    result,
+    enemyName: currentEnemy.name,
+    playerHP,
+    enemyHP,
+    score
+  }, "*");
+}
+
+function chooseLevel(lvl) {
+  level = lvl;
+  questionMisses = 0;
+  document.getElementById("level").innerText = lvl;
+  setStatus(`Level ${lvl} selected. Cast with ${getCurrentSpell().name}.`);
+  generateQuestion();
+}
+
+function getMathProfile() {
+  if (mathDifficulty === "easy") {
+    return {
+      label: "Easy",
+      add: { a: [1, 7], b: [1, 6] },
+      subtract: { a: [6, 14], b: [1, 6] },
+      multiply: { a: [2, 8], b: [2, 6] },
+      divide: { answer: [2, 6], b: [2, 6] },
+      order: { a: [2, 6], b: [2, 5], c: [1, 6] }
+    };
+  }
+
+  if (mathDifficulty === "hard") {
+    return {
+      label: "Hard",
+      add: { a: [4, 18], b: [3, 16] },
+      subtract: { a: [14, 35], b: [4, 18] },
+      multiply: { a: [4, 14], b: [3, 14] },
+      divide: { answer: [3, 12], b: [3, 12] },
+      order: { a: [3, 12], b: [3, 12], c: [3, 14] }
+    };
+  }
+
+  return {
+    label: "Normal",
+    add: { a: [1, 10], b: [1, 10] },
+    subtract: { a: [5, 20], b: [1, 10] },
+    multiply: { a: [2, 12], b: [2, 12] },
+    divide: { answer: [2, 10], b: [2, 10] },
+    order: { a: [2, 10], b: [2, 10], c: [1, 10] }
+  };
+}
+
+function updateMathDifficultyButtons() {
+  ["easy", "normal", "hard"].forEach((mode) => {
+    const button = document.getElementById(`math-${mode}`);
+    if (!button) return;
+    button.classList.toggle("selected-toggle", mode === mathDifficulty);
+  });
+
+  document.getElementById("mathMode").innerText = getMathProfile().label;
+}
+
+function chooseMathDifficulty(mode) {
+  mathDifficulty = mode;
+  updateMathDifficultyButtons();
+
+  if (level) {
+    setStatus(`${getMathProfile().label} math selected. Your next question has been refreshed.`);
+    generateQuestion();
+  } else {
+    setStatus(`${getMathProfile().label} math selected. Pick a level to begin the duel.`);
+  }
+}
+
+function getSpellById(id) {
+  return spellPool.find((spell) => spell.id === id);
+}
+
+function getCurrentSpell() {
+  return getSpellById(currentSpellId) || spellPool[0];
+}
+
+function getOwnedSpellIds() {
+  return Object.keys(spellLevels);
+}
+
+function getSpellLevel(id) {
+  return spellLevels[id] || 0;
+}
+
+function getScaledSpellStats(spell) {
+  const spellLevel = Math.max(1, getSpellLevel(spell.id));
+  const upgradeBonus = spellLevel - 1;
+
+  return {
+    ...spell,
+    spellLevel,
+    baseDamage: spell.baseDamage + upgradeBonus * 2,
+    crit: spell.crit + upgradeBonus,
+    power: spell.power + upgradeBonus,
+    ward: spell.ward + Math.floor(upgradeBonus / 2),
+    focus: spell.focus + Math.floor(upgradeBonus / 2),
+    vitality: spell.vitality + upgradeBonus * 3,
+    lifesteal: spell.lifesteal + Math.floor(upgradeBonus / 2)
+  };
+}
+
+function getPlayerStats() {
+  const stats = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0 };
+
+  getOwnedSpellIds().forEach((id) => {
+    const spell = getScaledSpellStats(getSpellById(id));
+    stats.power += spell.power;
+    stats.ward += spell.ward;
+    stats.focus += spell.focus;
+    stats.vitality += spell.vitality;
+    stats.lifesteal += spell.lifesteal;
+  });
+
+  stats.power += potionBonuses.power;
+  stats.ward += potionBonuses.ward;
+  stats.focus += potionBonuses.focus;
+  stats.vitality += potionBonuses.vitality;
+  stats.lifesteal += potionBonuses.lifesteal;
+
+  stats.power += deathBlessings.power;
+  stats.ward += deathBlessings.ward;
+  stats.focus += deathBlessings.focus;
+  stats.vitality += deathBlessings.vitality;
+  stats.lifesteal += deathBlessings.lifesteal;
+
+  return stats;
+}
+
+function recalculatePlayerTotals(preserveRatio = true) {
+  const oldMax = maxPlayerHP;
+  const ratio = oldMax > 0 ? playerHP / oldMax : 1;
+  const stats = getPlayerStats();
+  maxPlayerHP = basePlayerMaxHP + stats.vitality;
+  playerHP = preserveRatio ? Math.round(maxPlayerHP * ratio) : Math.min(playerHP, maxPlayerHP);
+  if (playerHP > maxPlayerHP) playerHP = maxPlayerHP;
+}
+
+function setCombatFeed(message) {
+  const feed = document.getElementById("combatFeed");
+  if (feed) {
+    feed.innerText = message;
+  }
+}
+
+function pulsePanel(id, className) {
+  const panel = document.getElementById(id);
+  if (!panel) return;
+  panel.classList.remove(className);
+  void panel.offsetWidth;
+  panel.classList.add(className);
+  setTimeout(() => panel.classList.remove(className), 260);
+}
+
+function getEarlyBattleProtection() {
+  return battleCount <= 2 ? 0.5 : battleCount <= 4 ? 0.75 : 1;
+}
+
+function getSpellEffectText(spell) {
+  const effects = {
+    spark: "Spark Shot adds a crackling bonus burst and is strongest at quick low-level casts.",
+    ember: "Ember Burst burns hotter on tougher math and adds extra finishing power.",
+    moss: "Moss Guard grants a bark barrier and stronger recovery after clean casts.",
+    frost: "Frost Sigil chills the enemy, softening its next attack.",
+    storm: "Storm Chain gains extra crit force on harder questions.",
+    prism: "Prism Bloom restores extra health and smooths out long fights.",
+    nova: "Sun Nova ignores part of enemy armor and spikes on big casts.",
+    aegis: "Aegis Rune builds a heavier barrier that can blunt the next enemy move.",
+    void: "Void Lantern steals deeper life on correct hits.",
+    meteor: "Meteor Crown hits harder against healthy enemies.",
+    oracle: "Oracle Glass sharpens focus and opens better recovery windows."
+  };
+  return effects[spell.id] || spell.text;
+}
+
+function calculateDamage() {
+  const spell = getScaledSpellStats(getCurrentSpell());
+  const stats = getPlayerStats();
+  const base = level * 10 + spell.baseDamage + stats.power;
+  let bonusDamage = 0;
+  let armorPierce = 0;
+  let extraLifesteal = 0;
+  let barrierGain = 0;
+  let weakenGain = 0;
+  let critBonus = 0;
+
+  if (spell.id === "spark") {
+    bonusDamage += Math.max(1, 5 - level);
+  } else if (spell.id === "ember") {
+    bonusDamage += level >= 3 ? 5 : 2;
+  } else if (spell.id === "moss") {
+    barrierGain += 5 + Math.floor(spell.spellLevel / 2);
+    extraLifesteal += 5;
+  } else if (spell.id === "frost") {
+    weakenGain += 3 + Math.floor(spell.spellLevel / 2);
+  } else if (spell.id === "storm") {
+    critBonus += level >= 3 ? 12 : 5;
+  } else if (spell.id === "prism") {
+    extraLifesteal += 8;
+  } else if (spell.id === "nova") {
+    armorPierce += 2 + Math.floor(level / 2);
+    bonusDamage += level;
+  } else if (spell.id === "aegis") {
+    barrierGain += 9 + spell.spellLevel;
+  } else if (spell.id === "void") {
+    extraLifesteal += 10;
+    critBonus += 4;
+  } else if (spell.id === "meteor") {
+    bonusDamage += Math.round((enemyHP / Math.max(1, maxEnemyHP)) * 8);
+  } else if (spell.id === "oracle") {
+    critBonus += 8;
+    extraLifesteal += 4;
+  }
+
+  const critChance = spell.crit + stats.focus * 2 + critBonus;
+  const crit = rand(1, 100) <= critChance;
+  const critMultiplier = crit ? 1.5 : 1;
+  const rawDamage = Math.round((base + bonusDamage) * critMultiplier);
+  const finalDamage = Math.max(1, rawDamage - Math.max(0, currentEnemy.armor - armorPierce));
+  return { value: finalDamage, crit, extraLifesteal, barrierGain, weakenGain, armorPierce };
+}
+
+function calculateEnemyAttack() {
+  const stats = getPlayerStats();
+  const move = nextEnemyMove || planEnemyMove();
+  let raw = move.damage + rand(0, move.swing);
+  raw = Math.max(1, raw - enemyWeaken);
+  let reduced = Math.max(0, raw - stats.ward - playerBarrier);
+  const blocked = raw - reduced;
+  return { damage: reduced, blocked, move };
+}
+
+function getAllowedRarities() {
+  if (battleCount >= 8) return ["Common", "Rare", "Epic", "Legendary"];
+  if (battleCount >= 5) return ["Common", "Rare", "Epic"];
+  if (battleCount >= 2) return ["Common", "Rare"];
+  return ["Common"];
+}
+
+function getEnemyIntentText() {
+  if (nextEnemyMove) return `Intent: ${nextEnemyMove.label}`;
+  if (currentEnemy.phaseText) return `Intent: ${currentEnemy.phaseText}`;
+  if (currentEnemy.thorns >= 2) return "Intent: Thorned retaliation";
+  if (currentEnemy.fury >= 2) return "Intent: Wild burst";
+  if (currentEnemy.armor >= 3) return "Intent: Heavy guard";
+  return "Intent: Pressing attack";
+}
+
+function planEnemyMove() {
+  const turn = enemyTurnCount + 1;
+  const baseDamage = enemyAttack;
+
+  if (currentEnemy.name === "Goblin Scout") {
+    if (turn % 3 === 0) {
+      return { label: "Quick jab", damage: baseDamage + 2, swing: 2, apply() {} };
+    }
+    return { label: "Testing strike", damage: baseDamage, swing: 2, apply() {} };
+  }
+
+  if (currentEnemy.name === "Bone Knight") {
+    if (turn % 3 === 0) {
+      return {
+        label: "Shield stance",
+        damage: Math.max(1, baseDamage - 4),
+        swing: 1,
+        apply() {
+          currentEnemy.armor += 1;
+          currentEnemy.bonusText = "Heavy armor and bone spikes. Shield stance thickens its guard.";
+        }
+      };
+    }
+    return { label: "Bone cleave", damage: baseDamage + 1, swing: 2, apply() {} };
+  }
+
+  if (currentEnemy.name === "Swamp Witch") {
+    if (turn % 2 === 0) {
+      return {
+        label: "Hex burst",
+        damage: baseDamage + 2,
+        swing: 3,
+        apply() {
+          playerBarrier = Math.max(0, playerBarrier - 2);
+        }
+      };
+    }
+    return { label: "Bog bolt", damage: baseDamage, swing: 3, apply() {} };
+  }
+
+  if (currentEnemy.name === "Ash Drake") {
+    if (turn % 3 === 0) {
+      return {
+        label: "Flare breath",
+        damage: baseDamage + 4,
+        swing: 3,
+        apply() {
+          currentEnemy.thorns += 1;
+        }
+      };
+    }
+    return { label: "Scorching rake", damage: baseDamage + 1, swing: 2, apply() {} };
+  }
+
+  if (turn % 3 === 0) {
+    return {
+      label: "Titan crash",
+      damage: baseDamage + 5,
+      swing: 3,
+      apply() {
+        currentEnemy.fury += 1;
+      }
+    };
+  }
+
+  return { label: "Void hammer", damage: baseDamage + 1, swing: 3, apply() {} };
+}
+
+function renderPlayerStats() {
+  const stats = getPlayerStats();
+  document.getElementById("playerStatsPanel").innerHTML = `
+    <div><strong>Power:</strong> ${stats.power}</div>
+    <div><strong>Ward:</strong> ${stats.ward}</div>
+    <div><strong>Focus:</strong> ${stats.focus}</div>
+    <div><strong>Vitality:</strong> +${stats.vitality} HP</div>
+    <div><strong>Lifesteal:</strong> ${stats.lifesteal}%</div>
+    <div><strong>Barrier:</strong> ${playerBarrier}</div>
+    <div><strong>Deaths:</strong> ${deathBlessings.deaths}</div>
+  `;
+}
+
+function renderEnemyStats() {
+  const cycle = Math.floor((battleCount - 1) / enemyRoster.length);
+  document.getElementById("enemyStatsPanel").innerHTML = `
+    <div><strong>Armor:</strong> ${currentEnemy.armor}</div>
+    <div><strong>Thorns:</strong> ${currentEnemy.thorns}</div>
+    <div><strong>Fury:</strong> ${currentEnemy.fury}</div>
+    <div><strong>Forecast:</strong> ${nextEnemyMove ? nextEnemyMove.label : "Reading..."}</div>
+    <div><strong>Tier:</strong> ${cycle + 1}</div>
+    <div>${currentEnemy.bonusText}</div>
+  `;
+}
+
+function formatSpellCard(spell) {
+  return `
+    <span class="card-rarity">${spell.rarity}</span>
+    <span class="card-title">${spell.name} Lv.${spell.spellLevel}</span>
+    <span class="card-meta">Level ${spell.minLevel}+ | Base damage +${spell.baseDamage}</span>
+    <span class="card-meta">Power +${spell.power} | Ward +${spell.ward} | Focus +${spell.focus}</span>
+    <span class="card-meta">Vitality +${spell.vitality} | Lifesteal ${spell.lifesteal}% | Crit ${spell.crit}%</span>
+    <span class="card-meta">${spell.text}</span>
+    <span class="card-meta">${getSpellEffectText(spell)}</span>
+  `;
+}
+
+function formatPotionCard(potion) {
+  return `
+    <span class="card-rarity">${potion.rarity}</span>
+    <span class="card-title">${potion.name}</span>
+    <span class="card-meta">Restore ${potion.health} HP immediately</span>
+    <span class="card-meta">Power +${potion.power} | Ward +${potion.ward} | Focus +${potion.focus}</span>
+    <span class="card-meta">Vitality +${potion.vitality} | Lifesteal +${potion.lifesteal}%</span>
+    <span class="card-meta">${potion.text}</span>
+  `;
+}
+
+function formatDeathBlessing(choice) {
+  return `
+    <span class="card-rarity">Blessing</span>
+    <span class="card-title">${choice.name}</span>
+    <span class="card-meta">${choice.line1}</span>
+    <span class="card-meta">${choice.line2}</span>
+    <span class="card-meta">${choice.text}</span>
+  `;
+}
+
+function buildHintMarkup() {
+  if (!currentQuestionData) {
+    return "<div>No hint yet. Pick a level to generate a question.</div>";
+  }
+
+  const revealAnswer = questionMisses >= 2;
+
+  if (currentQuestionData.type === "add") {
+    return `
+      <div><strong>Guide:</strong> Break the sum into a start number and a small count forward.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> Count forward ${currentQuestionData.b} more.</div>
+      <div><strong>Check:</strong> ${currentQuestionData.a} + ${currentQuestionData.b} = ?</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} + ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "add-missing") {
+    return `
+      <div><strong>Guide:</strong> Find the missing part by comparing the total and the known addend.</div>
+      <div><strong>Step 1:</strong> The total is ${currentQuestionData.total}.</div>
+      <div><strong>Step 2:</strong> Take away the known part: ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ? + ${currentQuestionData.b} = ${currentQuestionData.total}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.total} - ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "subtract") {
+    return `
+      <div><strong>Guide:</strong> Start with the larger number and take away step by step.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> Count backward ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> What is left after taking away ${currentQuestionData.b}?</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} - ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "subtract-missing") {
+    return `
+      <div><strong>Guide:</strong> Ask how much was taken away from the starting number.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> End at ${currentQuestionData.result}.</div>
+      <div><strong>Check:</strong> ${currentQuestionData.a} - ? = ${currentQuestionData.result}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} - ${currentQuestionData.result} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "subtract-start") {
+    return `
+      <div><strong>Guide:</strong> Rebuild the starting number by adding back what was removed.</div>
+      <div><strong>Step 1:</strong> The ending number is ${currentQuestionData.result}.</div>
+      <div><strong>Step 2:</strong> Add back ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ? - ${currentQuestionData.b} = ${currentQuestionData.result}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.result} + ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "multiply") {
+    return `
+      <div><strong>Guide:</strong> Turn multiplication into repeated addition.</div>
+      <div><strong>Step 1:</strong> Think of ${currentQuestionData.a} groups of ${currentQuestionData.b}.</div>
+      <div><strong>Step 2:</strong> Add ${currentQuestionData.b} repeatedly: ${currentQuestionData.repeatText}</div>
+      <div><strong>Check:</strong> Multiplication is repeated addition.</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.repeatText} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "multiply-missing") {
+    return `
+      <div><strong>Guide:</strong> Find the missing factor that makes the product.</div>
+      <div><strong>Step 1:</strong> The full product is ${currentQuestionData.product}.</div>
+      <div><strong>Step 2:</strong> Divide by the known factor ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ? x ${currentQuestionData.b} = ${currentQuestionData.product}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.product} / ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "divide") {
+    const skipCounts = Array.from({ length: currentAnswer }, (_, index) => currentQuestionData.b * (index + 1)).join(", ");
+    return `
+      <div><strong>Guide:</strong> Use multiplication to reverse the division.</div>
+      <div><strong>Step 1:</strong> Ask: ${currentQuestionData.b} times what number makes ${currentQuestionData.a}?</div>
+      <div><strong>Step 2:</strong> Try skip-counting by ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ${currentQuestionData.b} x ? = ${currentQuestionData.a}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${skipCounts}. So ${currentQuestionData.a} / ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "divide-missing") {
+    return `
+      <div><strong>Guide:</strong> The missing divisor tells how many equal groups fit.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> If each group becomes ${currentQuestionData.quotient}, what divisor works?</div>
+      <div><strong>Check:</strong> ${currentQuestionData.a} / ? = ${currentQuestionData.quotient}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} / ${currentQuestionData.quotient} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "divide-start") {
+    return `
+      <div><strong>Guide:</strong> Rebuild the starting number from divisor and quotient.</div>
+      <div><strong>Step 1:</strong> Multiply the quotient ${currentQuestionData.quotient} by the divisor ${currentQuestionData.b}.</div>
+      <div><strong>Step 2:</strong> That gives the missing starting number.</div>
+      <div><strong>Check:</strong> ? / ${currentQuestionData.b} = ${currentQuestionData.quotient}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.quotient} x ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "grouped-order") {
+    const groupedSum = currentQuestionData.a + currentQuestionData.b;
+    return `
+      <div><strong>Guide:</strong> Parentheses go first.</div>
+      <div><strong>Step 1:</strong> Add inside the parentheses: ${currentQuestionData.a} + ${currentQuestionData.b} = ${groupedSum}</div>
+      <div><strong>Step 2:</strong> Multiply ${groupedSum} by ${currentQuestionData.c}.</div>
+      <div><strong>Check:</strong> Solve inside () before multiplying.</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> (${currentQuestionData.a} + ${currentQuestionData.b}) x ${currentQuestionData.c} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  const multiplied = currentQuestionData.a * currentQuestionData.b;
+  return `
+    <div><strong>Guide:</strong> Solve the multiplication part before the addition.</div>
+    <div><strong>Step 1:</strong> Do multiplication first: ${currentQuestionData.a} x ${currentQuestionData.b}</div>
+    <div><strong>Step 2:</strong> Then add ${currentQuestionData.c} to ${multiplied}.</div>
+    <div><strong>Check:</strong> Follow order of operations, multiplication before addition.</div>
+    ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} x ${currentQuestionData.b} = ${multiplied}, then ${multiplied} + ${currentQuestionData.c} = ${currentAnswer}</div>` : ""}
+  `;
+}
+
+function updateHintPanel() {
+  const hintPanel = document.getElementById("hintPanel");
+  if (hintPanel.style.display === "none") {
+    return;
+  }
+
+  hintPanel.innerHTML = buildHintMarkup();
+}
+
+function toggleHint() {
+  const hintPanel = document.getElementById("hintPanel");
+  const showing = hintPanel.style.display !== "none";
+  hintPanel.style.display = showing ? "none" : "block";
+  if (!showing) {
+    hintPanel.innerHTML = buildHintMarkup();
+  }
+}
+
+function renderSpellBook() {
+  const grid = document.getElementById("spellGrid");
+  grid.innerHTML = "";
+  document.getElementById("cardsEarned").innerText = getOwnedSpellIds().length;
+
+  getOwnedSpellIds().forEach((id) => {
+    const spell = getScaledSpellStats(getSpellById(id));
+    const button = document.createElement("button");
+    button.className = "spell-button" + (id === currentSpellId ? " selected" : "");
+    button.onclick = () => selectSpell(id);
+    button.innerHTML = formatSpellCard(spell);
+    grid.appendChild(button);
+  });
+
+  renderPlayerStats();
+  updateSelectedSpell();
+}
+
+function selectSpell(id) {
+  currentSpellId = id;
+  renderSpellBook();
+
+  const spell = getScaledSpellStats(getCurrentSpell());
+  if (level && level < spell.minLevel) {
+    setStatus(`${spell.name} needs level ${spell.minLevel}. Choose a tougher difficulty to use it.`);
+    document.getElementById("question").innerText = `Choose at least Level ${spell.minLevel}`;
+  } else if (level) {
+    setStatus(`${spell.name} is ready. Solve the next problem to cast it.`);
+    generateQuestion();
+  } else {
+    setStatus(`${spell.name} selected. Pick a level to generate a math challenge.`);
+  }
+}
+
+function updateSelectedSpell() {
+  const spell = getScaledSpellStats(getCurrentSpell());
+  const stats = getPlayerStats();
+  document.getElementById("activeSpellName").innerText = spell.name;
+  document.getElementById("spellDamage").innerText = level ? Math.max(1, level * 8 + spell.baseDamage + stats.power - currentEnemy.armor) : spell.baseDamage + stats.power;
+}
+
+function getMilestoneChoices() {
+  return [
+    {
+      id: "spring",
+      name: "Moonspring Rest",
+      line1: "Heal 35% max HP",
+      line2: "Ward +1",
+      text: "A silver spring restores strength and hardens your guard.",
+      apply() {
+        const heal = Math.round(maxPlayerHP * 0.35);
+        playerHP = Math.min(maxPlayerHP, playerHP + heal);
+        potionBonuses.ward += 1;
+      }
+    },
+    {
+      id: "forge",
+      name: "Rune Forge",
+      line1: "Upgrade current spell +1",
+      line2: "Power +1",
+      text: "A forge-tempest etches a sharper edge into your favorite spell.",
+      apply() {
+        spellLevels[currentSpellId] = (spellLevels[currentSpellId] || 1) + 1;
+        potionBonuses.power += 1;
+      }
+    },
+    {
+      id: "library",
+      name: "Star Library",
+      line1: "Focus +2",
+      line2: "Lifesteal +2%",
+      text: "Ancient notes steady your aim and improve your recovery.",
+      apply() {
+        potionBonuses.focus += 2;
+        potionBonuses.lifesteal += 2;
+      }
+    }
+  ];
+}
+
+function showMilestoneChoices() {
+  milestoneChoices = getMilestoneChoices();
+  const milestoneGrid = document.getElementById("milestoneGrid");
+  milestoneGrid.innerHTML = "";
+
+  milestoneChoices.forEach((choice) => {
+    const button = document.createElement("button");
+    button.className = "reward-choice";
+    button.onclick = () => claimMilestone(choice.id);
+    button.innerHTML = formatDeathBlessing(choice);
+    milestoneGrid.appendChild(button);
+  });
+
+  document.getElementById("milestonePanel").classList.add("show");
+  setStatus("A milestone boon is ready. Choose one blessing before the next enemy.");
+}
+
+function claimMilestone(choiceId) {
+  const choice = milestoneChoices.find((item) => item.id === choiceId);
+  if (!choice) return;
+
+  choice.apply();
+  milestoneChoices = [];
+  recalculatePlayerTotals(false);
+  document.getElementById("milestonePanel").classList.remove("show");
+  loadNextEnemy();
+  renderSpellBook();
+  updateHealthBars();
+  generateQuestion();
+  setStatus(`${choice.name} strengthens your run for the next stretch.`);
+  setCombatFeed(choice.text);
+}
+
+function generateQuestion() {
+  const spell = getScaledSpellStats(getCurrentSpell());
+  const profile = getMathProfile();
+  questionMisses = 0;
+
+  if (!level) {
+    currentAnswer = null;
+    currentQuestionData = null;
+    document.getElementById("question").innerText = "Pick a level and a spell card";
+    updateHintPanel();
+    updateSelectedSpell();
+    return;
+  }
+
+  if (level < spell.minLevel) {
+    currentAnswer = null;
+    currentQuestionData = null;
+    document.getElementById("question").innerText = `${spell.name} needs Level ${spell.minLevel}`;
+    updateHintPanel();
+    updateSelectedSpell();
+    return;
+  }
+
+  let a;
+  let b;
+  let q;
+
+  if (level === 1) {
+    a = rand(profile.add.a[0], profile.add.a[1]);
+    b = rand(profile.add.b[0], profile.add.b[1]);
+    currentAnswer = a + b;
+    currentQuestionData = { type: "add", a, b };
+    q = `${a} + ${b}`;
+  } else if (level === 2) {
+    a = rand(profile.subtract.a[0], profile.subtract.a[1]);
+    b = rand(profile.subtract.b[0], profile.subtract.b[1]);
+    currentAnswer = a - b;
+    currentQuestionData = { type: "subtract", a, b };
+    q = `${a} - ${b}`;
+  } else if (level === 3) {
+    a = rand(profile.multiply.a[0], profile.multiply.a[1]);
+    b = rand(profile.multiply.b[0], profile.multiply.b[1]);
+    currentAnswer = a * b;
+    currentQuestionData = {
+      type: "multiply",
+      a,
+      b,
+      repeatText: Array.from({ length: a }, () => b).join(" + ")
+    };
+    q = `${a} x ${b}`;
+  } else if (level === 4) {
+    b = rand(profile.divide.b[0], profile.divide.b[1]);
+    currentAnswer = rand(profile.divide.answer[0], profile.divide.answer[1]);
+    a = currentAnswer * b;
+    currentQuestionData = { type: "divide", a, b };
+    q = `${a} / ${b}`;
+  } else {
+    a = rand(profile.order.a[0], profile.order.a[1]);
+    b = rand(profile.order.b[0], profile.order.b[1]);
+    const c = rand(profile.order.c[0], profile.order.c[1]);
+    currentAnswer = a * b + c;
+    currentQuestionData = { type: "order", a, b, c };
+    q = `${a} x ${b} + ${c}`;
+  }
+
+  document.getElementById("question").innerText = q;
+  updateHintPanel();
+  updateSelectedSpell();
+}
+
+function submitAnswer() {
+  if (rewardChoices.length > 0 || deathChoices.length > 0 || milestoneChoices.length > 0) {
+    setStatus("Choose your pending reward, blessing, or milestone boon before continuing.");
+    return;
+  }
+
+  if (currentAnswer === null) {
+    setStatus("Choose a valid level and spell before casting.");
+    return;
+  }
+
+  const answerField = document.getElementById("answer");
+  if (answerField.value.trim() === "") {
+    setStatus("Enter an answer before casting.");
+    return;
+  }
+
+  const user = Number(answerField.value);
+  const answeredCorrectly = user === currentAnswer;
+  const stats = getPlayerStats();
+  const attackRoll = calculateDamage();
+  let text = "";
+
+  if (answeredCorrectly) {
+    enemyHP -= attackRoll.value;
+    score += attackRoll.value + Math.floor((battleCount - 1) / enemyRoster.length) * 5;
+    text = attackRoll.crit
+      ? `Critical hit for ${attackRoll.value} damage.`
+      : `Hit landed for ${attackRoll.value} damage.`;
+
+    if (stats.lifesteal + attackRoll.extraLifesteal > 0) {
+      const heal = Math.max(1, Math.round((attackRoll.value * (stats.lifesteal + attackRoll.extraLifesteal)) / 100));
+      playerHP = Math.min(maxPlayerHP, playerHP + heal);
+      text += ` You heal ${heal}.`;
+    }
+
+    if (attackRoll.barrierGain > 0) {
+      playerBarrier += attackRoll.barrierGain;
+      text += ` Barrier +${attackRoll.barrierGain}.`;
+    }
+
+    if (attackRoll.weakenGain > 0) {
+      enemyWeaken += attackRoll.weakenGain;
+      text += ` Enemy attack weakened by ${attackRoll.weakenGain}.`;
+    }
+
+    if (currentEnemy.thorns > 0) {
+      const thornDamage = Math.max(1, currentEnemy.thorns - stats.ward);
+      playerHP -= thornDamage;
+      text += ` Thorns strike back for ${thornDamage}.`;
+    }
+
+    if (attackRoll.crit) {
+      pulsePanel("playerPanel", "crit-panel");
+      pulsePanel("enemyPanel", "hit-panel");
+      setCombatFeed("Critical magic tears through the battlefield.");
+    } else {
+      pulsePanel("enemyPanel", "hit-panel");
+      setCombatFeed(`Your ${getCurrentSpell().name} lands cleanly.`);
+    }
+  } else {
+    const reflected = Math.max(1, Math.round((attackRoll.value - stats.ward) * getEarlyBattleProtection()));
+    playerHP -= reflected;
+    questionMisses += 1;
+    const hintPanel = document.getElementById("hintPanel");
+    hintPanel.style.display = "block";
+    hintPanel.innerHTML = buildHintMarkup();
+    text = `Spell reflected for ${reflected} damage.`;
+    if (battleCount <= 2) {
+      text += " Early-battle protection softens the blow.";
+    }
+    if (questionMisses === 1) {
+      text += " A guided hint opens to help with the next try.";
+    } else {
+      text += " The hint now shows a worked example.";
+    }
+    pulsePanel("playerPanel", "hit-panel");
+    setCombatFeed("Your spell slips. The backlash bites, but the run still gives you room to learn.");
+  }
+
+  clampHealth();
+  updateHealthBars();
+  document.getElementById("score").innerText = score;
+  document.getElementById("result").innerText = text;
+  document.getElementById("playerCard").classList.add("flip");
+
+  if (enemyHP === 0) {
+    if (embedMode) {
+      setStatus("Enemy defeated.");
+      setCombatFeed("The encounter breaks under your spellcraft.");
+      notifyEmbedResult("win");
+      return;
+    }
+    setStatus("Enemy defeated. Draft one of three spell cards.");
+    setTimeout(() => {
+      awardSpellChoices();
+    }, 120);
+    return;
+  }
+
+  if (playerHP === 0) {
+    setTimeout(() => {
+      handleDefeat();
+    }, 120);
+    return;
+  }
+
+  const counterAttack = calculateEnemyAttack();
+  playerHP -= counterAttack.damage;
+  playerBarrier = Math.max(0, playerBarrier - counterAttack.blocked);
+  enemyWeaken = 0;
+  enemyTurnCount += 1;
+  counterAttack.move.apply();
+  clampHealth();
+  updateHealthBars();
+  document.getElementById("result").innerText = `${text} ${counterAttack.move.label} hits for ${counterAttack.damage}.`;
+  if (counterAttack.damage > 0) {
+    pulsePanel("playerPanel", "hit-panel");
+  }
+  setCombatFeed(
+    counterAttack.blocked > 0
+      ? `${counterAttack.move.label} slams in, but your barrier blocks ${counterAttack.blocked}.`
+      : `${counterAttack.move.label} connects.`
+  );
+  nextEnemyMove = planEnemyMove();
+  document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+  renderEnemyStats();
+
+  if (playerHP === 0) {
+    setTimeout(() => {
+      handleDefeat();
+    }, 120);
+    return;
+  }
+
+  setTimeout(() => {
+    resetCard(answeredCorrectly);
+    if (answeredCorrectly) {
+      generateQuestion();
+    } else {
+      updateHintPanel();
+    }
+  }, 220);
+}
+
+function handleDefeat() {
+  if (embedMode) {
+    setStatus("Your magic falters.");
+    setCombatFeed("The encounter slips away from your grasp.");
+    notifyEmbedResult("lose");
+    return;
+  }
+  showDeathBlessings();
+  setStatus("Defeat has opened a blessing path. Choose how your next run improves.");
+}
+
+function getDeathBlessingChoices() {
+  return [
+    {
+      id: "ember-oath",
+      name: "Ember Oath",
+      line1: "Power +1 | Focus +1",
+      line2: "Vitality +4",
+      text: "Strike harder on the next run with a more explosive spell path.",
+      apply() {
+        deathBlessings.power += 1;
+        deathBlessings.focus += 1;
+        deathBlessings.vitality += 4;
+      }
+    },
+    {
+      id: "iron-bark",
+      name: "Iron Bark Vow",
+      line1: "Ward +2 | Vitality +10",
+      line2: "Power +0",
+      text: "Turn the next run into a sturdier climb with heavier protection.",
+      apply() {
+        deathBlessings.ward += 2;
+        deathBlessings.vitality += 10;
+      }
+    },
+    {
+      id: "moonwell",
+      name: "Moonwell Grace",
+      line1: "Lifesteal +1% | Vitality +8",
+      line2: "Focus +1",
+      text: "Build a safer recovery loop and stronger sustain for the next run.",
+      apply() {
+        deathBlessings.lifesteal += 1;
+        deathBlessings.vitality += 8;
+        deathBlessings.focus += 1;
+      }
+    }
+  ];
+}
+
+function showDeathBlessings() {
+  deathChoices = getDeathBlessingChoices();
+  const deathGrid = document.getElementById("deathGrid");
+  deathGrid.innerHTML = "";
+
+  deathChoices.forEach((choice) => {
+    const button = document.createElement("button");
+    button.className = "reward-choice";
+    button.onclick = () => claimDeathBlessing(choice.id);
+    button.innerHTML = formatDeathBlessing(choice);
+    deathGrid.appendChild(button);
+  });
+
+  document.getElementById("deathPanel").classList.add("show");
+  setStatus("Choose a death blessing to empower your next run.");
+}
+
+function claimDeathBlessing(choiceId) {
+  const choice = deathChoices.find((item) => item.id === choiceId);
+  if (!choice) {
+    return;
+  }
+
+  deathBlessings.deaths += 1;
+  choice.apply();
+  deathChoices = [];
+  document.getElementById("deathPanel").classList.remove("show");
+  alert(`${choice.name} empowers your next run.`);
+  resetRun();
+}
+
+function getRewardChoices() {
+  const allowedRarities = getAllowedRarities();
+  const eligibleSpells = spellPool.filter((spell) => allowedRarities.includes(spell.rarity));
+  const pool = [...eligibleSpells];
+  const picks = [];
+
+  while (pool.length > 0 && picks.length < 3) {
+    const index = rand(0, pool.length - 1);
+    picks.push(pool.splice(index, 1)[0]);
+  }
+
+  if (picks.length < 3) {
+    const fallback = eligibleSpells;
+    fallback.forEach((spell) => {
+      if (picks.length < 3 && !picks.some((item) => item.id === spell.id)) {
+        picks.push(spell);
+      }
+    });
+  }
+
+  const potionChance = battleCount % 3 === 0 ? 60 : 30;
+  if (rand(1, 100) <= potionChance) {
+    const potion = potionPool[rand(0, potionPool.length - 1)];
+    picks[rand(0, picks.length - 1)] = potion;
+  }
+
+  return picks;
+}
+
+function awardSpellChoices() {
+  resetCard();
+  rewardChoices = getRewardChoices();
+  const rewardGrid = document.getElementById("rewardGrid");
+  rewardGrid.innerHTML = "";
+
+  rewardChoices.forEach((spell) => {
+    const button = document.createElement("button");
+    button.className = "reward-choice";
+    button.onclick = () => claimReward(spell.id);
+    button.innerHTML = spell.type === "potion" ? formatPotionCard(spell) : formatSpellCard(spell);
+    rewardGrid.appendChild(button);
+  });
+
+  document.getElementById("rewardPanel").classList.add("show");
+}
+
+function claimReward(spellId) {
+  if (rewardChoices.length === 0) {
+    return;
+  }
+
+  const reward = rewardChoices.find((item) => item.id === spellId);
+  if (!reward) {
+    return;
+  }
+
+  let duplicateSpellReward = false;
+
+  if (reward.type === "potion") {
+    potionBonuses.power += reward.power;
+    potionBonuses.ward += reward.ward;
+    potionBonuses.focus += reward.focus;
+    potionBonuses.vitality += reward.vitality;
+    potionBonuses.lifesteal += reward.lifesteal;
+  } else {
+    if (!spellLevels[spellId]) {
+      spellLevels[spellId] = 1;
+    } else {
+      duplicateSpellReward = true;
+      spellLevels[spellId] += 1;
+    }
+    currentSpellId = spellId;
+  }
+
+  rewardChoices = [];
+  document.getElementById("rewardPanel").classList.remove("show");
+
+  recalculatePlayerTotals(true);
+  battleCount += 1;
+  playerHP = Math.min(maxPlayerHP, playerHP + Math.round(maxPlayerHP * 0.15) + (reward.health || 0));
+
+  let extraMessage = "";
+  if (battleCount % 3 === 0) {
+    const milestoneHeal = Math.round(maxPlayerHP * 0.2);
+    playerHP = Math.min(maxPlayerHP, playerHP + milestoneHeal);
+    extraMessage = ` A moonwell restores ${milestoneHeal} HP before the next battle.`;
+  }
+
+  renderSpellBook();
+  updateHealthBars();
+  const rewardMessage =
+    reward.type === "potion"
+      ? `${reward.name} restored your strength and left a permanent blessing behind.${extraMessage}`
+      : duplicateSpellReward
+        ? `${getCurrentSpell().name} rose to rank ${getSpellLevel(spellId)} and grew stronger.${extraMessage}`
+        : `You claimed ${getCurrentSpell().name}. Your permanent bonuses grew and you recovered some HP.${extraMessage}`;
+
+  if (battleCount % 4 === 0) {
+    document.getElementById("rewardPanel").classList.remove("show");
+    showMilestoneChoices();
+    setCombatFeed("A milestone chamber opens between battles.");
+    return;
+  }
+
+  loadNextEnemy();
+  generateQuestion();
+  setStatus(rewardMessage);
+  setCombatFeed("New power settles into your spellbook.");
+}
+
+function loadNextEnemy() {
+  enemyIndex = (battleCount - 1) % enemyRoster.length;
+  const cycle = Math.floor((battleCount - 1) / enemyRoster.length);
+  const baseEnemy = enemyRoster[enemyIndex];
+  const scaledArmor = baseEnemy.armor + Math.floor(cycle / 1.5);
+  const scaledThorns = baseEnemy.thorns + Math.floor(cycle / 2);
+  const scaledFury = baseEnemy.fury + Math.floor((cycle + 1) / 2);
+  const scaledAttack = baseEnemy.attack + cycle * 3 + Math.floor((battleCount - 1) / 3);
+  maxEnemyHP = baseEnemy.maxHP + cycle * 28 + (battleCount - 1) * 4;
+  enemyHP = maxEnemyHP;
+  enemyAttack = scaledAttack;
+  currentEnemy = {
+    ...baseEnemy,
+    armor: scaledArmor,
+    thorns: scaledThorns,
+    fury: scaledFury,
+    attack: scaledAttack,
+    phaseText: cycle >= 2 ? "Escalating hunt" : "",
+    bonusText: `${baseEnemy.bonusText} Tier bonuses: +${scaledArmor - baseEnemy.armor} armor, +${scaledThorns - baseEnemy.thorns} thorns, +${scaledFury - baseEnemy.fury} fury.`
+  };
+  enemyTurnCount = 0;
+  enemyWeaken = 0;
+  nextEnemyMove = planEnemyMove();
+  document.getElementById("enemyName").innerText = currentEnemy.name;
+  document.getElementById("enemyFlavor").innerText = currentEnemy.flavor;
+  document.getElementById("enemyAttackText").innerText = `Enemy attack: ${enemyAttack}`;
+  document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+  document.getElementById("battleCount").innerText = battleCount;
+  renderEnemyStats();
+}
+
+function clampHealth() {
+  if (enemyHP < 0) enemyHP = 0;
+  if (enemyHP > maxEnemyHP) enemyHP = maxEnemyHP;
+  if (playerHP < 0) playerHP = 0;
+  if (playerHP > maxPlayerHP) playerHP = maxPlayerHP;
+}
+
+function updateHealthBars() {
+  const enemyPercent = (enemyHP / maxEnemyHP) * 100;
+  const playerPercent = (playerHP / maxPlayerHP) * 100;
+  document.getElementById("enemyHealth").style.width = `${enemyPercent}%`;
+  document.getElementById("enemyHPText").innerText = `HP: ${enemyHP} / ${maxEnemyHP}`;
+  document.getElementById("playerHealth").style.width = `${playerPercent}%`;
+  document.getElementById("playerHPText").innerText = `HP: ${playerHP} / ${maxPlayerHP}`;
+  renderPlayerStats();
+}
+
+function resetCard(hideHint = true) {
+  document.getElementById("playerCard").classList.remove("flip");
+  document.getElementById("answer").value = "";
+  if (hideHint) {
+    document.getElementById("hintPanel").style.display = "none";
+  }
+}
+
+function resetRun() {
+  level = 0;
+  score = 0;
+  currentAnswer = null;
+  currentQuestionData = null;
+  questionMisses = 0;
+  mathDifficulty = "normal";
+  currentSpellId = "spark";
+  spellLevels = { spark: 1 };
+  rewardChoices = [];
+  deathChoices = [];
+  milestoneChoices = [];
+  battleCount = 1;
+  enemyIndex = 0;
+  enemyTurnCount = 0;
+  playerBarrier = 0;
+  enemyWeaken = 0;
+  nextEnemyMove = null;
+  potionBonuses = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0 };
+  currentEnemy = enemyRoster[0];
+  maxPlayerHP = basePlayerMaxHP + getPlayerStats().vitality;
+  playerHP = maxPlayerHP;
+  maxEnemyHP = currentEnemy.maxHP;
+  enemyHP = maxEnemyHP;
+  enemyAttack = currentEnemy.attack;
+  if (embedEnemyConfig) {
+    currentEnemy = { ...embedEnemyConfig };
+    maxEnemyHP = currentEnemy.maxHP;
+    enemyHP = maxEnemyHP;
+    enemyAttack = currentEnemy.attack;
+    enemyTurnCount = 0;
+    enemyWeaken = 0;
+    nextEnemyMove = planEnemyMove();
+    document.getElementById("enemyName").innerText = currentEnemy.name;
+    document.getElementById("enemyFlavor").innerText = currentEnemy.flavor;
+    document.getElementById("enemyAttackText").innerText = `Enemy attack: ${enemyAttack}`;
+    document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+  } else {
+    loadNextEnemy();
+  }
+
+  document.getElementById("level").innerText = "-";
+  document.getElementById("mathMode").innerText = "Normal";
+  document.getElementById("battleCount").innerText = "1";
+  document.getElementById("score").innerText = "0";
+  document.getElementById("rewardPanel").classList.remove("show");
+  document.getElementById("deathPanel").classList.remove("show");
+  document.getElementById("milestonePanel").classList.remove("show");
+  if (embedMode) {
+    document.querySelector(".subtitle").innerText = "A focused duel from the frozen wild. Solve to strike, fail and the attack turns back on you.";
+  }
+
+  renderEnemyStats();
+  renderSpellBook();
+  updateMathDifficultyButtons();
+  resetCard();
+  updateHealthBars();
+  generateQuestion();
+  setStatus(embedMode ? "Pick a math level and break the enemy's attack." : "Pick a level and start building permanent stats into your deck.");
+  setCombatFeed("Battle magic crackles in the air.");
+}
+
+function setStatus(message) {
+  document.getElementById("statusText").innerText = message;
+}
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+resetRun();
+</script>
+</body>
+</html>
 
