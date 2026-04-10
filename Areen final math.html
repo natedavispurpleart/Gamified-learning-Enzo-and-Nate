@@ -1,0 +1,5138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Areen v3 - Full Systems Build</title>
+<style>
+:root {
+  --bg-night: #08111f;
+  --bg-deep: #050913;
+  --panel-night: rgba(10, 18, 34, 0.92);
+  --panel-soft: rgba(16, 29, 53, 0.9);
+  --line-ice: rgba(168, 216, 234, 0.32);
+  --ice: #a8d8ea;
+  --ice-bright: #dff6ff;
+  --gold: #e8c96a;
+  --ember: #ff8a3d;
+  --ember-deep: #d95c1a;
+  --ink: #e9f2ff;
+  --muted: rgba(233, 242, 255, 0.68);
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: "Courier New", "Lucida Console", monospace;
+  text-align: center;
+  background:
+    radial-gradient(circle at top, rgba(33, 64, 112, 0.35), transparent 36%),
+    linear-gradient(180deg, #0c1730 0%, #060b15 60%, #03050a 100%);
+  color: var(--ink);
+  min-height: 100vh;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.screen {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 16px 14px 24px;
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.settings-panel {
+  display: none;
+  margin: 0 auto 16px;
+  max-width: 1040px;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, #24140c, #120b08);
+  border: 3px solid #a56c2f;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.24);
+  text-align: left;
+}
+
+.settings-panel.open {
+  display: block;
+}
+
+.settings-title {
+  color: var(--gold);
+  font-size: 0.92rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 16px;
+  align-items: start;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 0.76rem;
+  color: #f0d28a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.settings-note {
+  font-size: 0.75rem;
+  color: rgba(233,242,255,0.72);
+  line-height: 1.5;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings-actions button {
+  padding: 9px 13px;
+  background: linear-gradient(180deg, rgba(39, 77, 136, 0.98), rgba(19, 40, 75, 0.98));
+  border: 2px solid rgba(168, 216, 234, 0.35);
+  color: var(--ice-bright);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 18px rgba(0,0,0,0.2);
+}
+
+.settings-toggle {
+  padding: 10px 16px;
+  background: linear-gradient(180deg, rgba(39, 77, 136, 0.98), rgba(19, 40, 75, 0.98));
+  border: 2px solid rgba(168, 216, 234, 0.35);
+  color: var(--ice-bright);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22);
+}
+
+.settings-toggle.pause-toggle {
+  background: linear-gradient(180deg, #6a3d12, #4b250d);
+  border-color: #b1783e;
+}
+
+.collection-panel {
+  display: none;
+  margin: 0 auto 16px;
+  max-width: 1040px;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, #24140c, #120b08);
+  border: 3px solid #a56c2f;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.24);
+  text-align: left;
+}
+
+.collection-panel.open {
+  display: block;
+}
+
+.dev-panel {
+  display: none;
+  margin: 0 auto 16px;
+  max-width: 1040px;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, #24140c, #120b08);
+  border: 3px solid #a56c2f;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.24);
+  text-align: left;
+}
+
+.dev-panel.open {
+  display: block;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 2.1rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+  text-shadow: 0 0 22px rgba(232, 201, 106, 0.22);
+}
+
+h2, h3 {
+  color: var(--ice-bright);
+}
+
+.subtitle {
+  max-width: 760px;
+  margin: 0 auto 14px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.buttons button,
+.spell-button,
+.reward-choice,
+.cast-button {
+  padding: 10px 14px;
+  border-radius: 0;
+  color: var(--ice-bright);
+  cursor: pointer;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+}
+
+.buttons button.selected-toggle {
+  background: linear-gradient(180deg, #e8c96a, #c9992b);
+  color: #1b2233;
+  border-color: #f0d68d;
+  box-shadow: 0 0 18px rgba(232, 201, 106, 0.22);
+}
+
+.buttons button,
+.cast-button {
+  background: linear-gradient(180deg, rgba(39, 77, 136, 0.98), rgba(19, 40, 75, 0.98));
+  border: 2px solid rgba(168, 216, 234, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22);
+}
+
+.buttons button:hover,
+.spell-button:hover,
+.reward-choice:hover,
+.cast-button:hover {
+  filter: brightness(1.08);
+}
+
+.game-area {
+  display: grid;
+  grid-template-columns: minmax(250px, 300px) minmax(300px, 1fr) minmax(250px, 300px);
+  gap: 14px;
+  align-items: start;
+}
+
+.panel {
+  width: auto;
+  padding: 14px;
+  background: linear-gradient(180deg, var(--panel-soft), var(--panel-night));
+  border: 2px solid var(--line-ice);
+  border-radius: 0;
+  box-shadow: 0 0 0 4px rgba(8, 12, 20, 0.88), 12px 12px 0 rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+.panel.hit-panel {
+  animation: panelShake 0.24s ease;
+}
+
+.panel.crit-panel {
+  animation: critFlash 0.3s ease;
+}
+
+.wide-panel {
+  width: auto;
+}
+
+.card-container {
+  perspective: 1000px;
+  margin-top: 16px;
+}
+
+.card {
+  width: 100%;
+  height: 360px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.36s;
+}
+
+.card.flip {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.front {
+  background: linear-gradient(180deg, rgba(16, 28, 50, 0.98), rgba(10, 18, 34, 0.96));
+  border: 2px solid rgba(168, 216, 234, 0.32);
+}
+
+.back {
+  background: linear-gradient(180deg, rgba(56, 28, 18, 0.98), rgba(25, 12, 8, 0.96));
+  border: 2px solid rgba(255, 138, 61, 0.42);
+  transform: rotateY(180deg);
+}
+
+.enemy-card {
+  background: linear-gradient(180deg, rgba(42, 17, 24, 0.95), rgba(14, 11, 21, 0.96));
+  min-height: 220px;
+  border: 2px solid rgba(255, 138, 61, 0.28);
+}
+
+.health-bar {
+  width: 100%;
+  height: 16px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.health-fill {
+  height: 100%;
+  width: 100%;
+  transition: width 0.55s ease;
+}
+
+#playerHealth {
+  background: linear-gradient(90deg, #4cc9f0, #a8d8ea);
+}
+
+#enemyHealth {
+  background: linear-gradient(90deg, #ff6a3d, #ffb347);
+}
+
+.info,
+.stat-list {
+  margin-top: 14px;
+  line-height: 1.7;
+}
+
+.stat-list {
+  text-align: left;
+  background: rgba(255,255,255,0.05);
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(168, 216, 234, 0.18);
+  color: var(--ink);
+}
+
+.stat-list strong {
+  color: var(--gold);
+}
+
+.question {
+  font-size: 1.45rem;
+  margin: 14px 0 10px;
+  color: var(--ice-bright);
+  text-shadow: 0 0 12px rgba(168, 216, 234, 0.18);
+}
+
+input {
+  width: 100%;
+  max-width: 180px;
+  padding: 10px;
+  margin: 10px 0 12px;
+  border-radius: 8px;
+  border: 2px solid rgba(168, 216, 234, 0.28);
+  background: rgba(5, 10, 22, 0.7);
+  color: #fff;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.spell-book {
+  margin-top: 28px;
+  text-align: left;
+}
+
+.spell-grid,
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.spell-button,
+.reward-choice {
+  text-align: left;
+  background: linear-gradient(180deg, rgba(17, 31, 57, 0.98), rgba(9, 18, 33, 0.96));
+  border: 1px solid rgba(168, 216, 234, 0.22);
+  color: var(--ink);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.spell-button::before,
+.reward-choice::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 2px solid rgba(240, 212, 140, 0.14);
+  pointer-events: none;
+}
+
+.spell-button::after,
+.reward-choice::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,0.02) 0 8px, rgba(0,0,0,0.06) 8px 16px);
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.spell-button.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(232, 201, 106, 0.16);
+}
+
+.reward-choice {
+  background: linear-gradient(180deg, rgba(42, 24, 13, 0.98), rgba(18, 12, 8, 0.96));
+  border-color: rgba(255, 138, 61, 0.26);
+}
+
+.card-title {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  color: var(--ice-bright);
+}
+
+.card-rarity {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.card-meta {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.reward-keyword {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background: rgba(240, 210, 154, 0.1);
+  border: 2px solid rgba(240, 210, 154, 0.34);
+  color: #f0d29a;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status {
+  min-height: 24px;
+  margin-top: 16px;
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.combat-feed {
+  min-height: 18px;
+  margin-top: 8px;
+  font-size: 0.76rem;
+  color: var(--ice);
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  opacity: 0.88;
+}
+
+.turn-order {
+  min-height: 18px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: #d5b27a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.intent-chip {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 3px 8px;
+  border: 2px solid #7e4a1d;
+  background: rgba(58, 27, 12, 0.92);
+  color: #f1e7d7;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.intent-chip.attack { border-color: #c96a36; color: #ffcfb0; }
+.intent-chip.guard { border-color: #d0b15a; color: #fff0b3; }
+.intent-chip.curse { border-color: #8e67c7; color: #e2d1ff; }
+.intent-chip.charge { border-color: #d24646; color: #ffd4d4; }
+
+.pause-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 430;
+  background: rgba(8, 5, 4, 0.84);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pause-panel.show {
+  display: flex;
+}
+
+.pause-card {
+  width: min(440px, 100%);
+  background: linear-gradient(180deg, rgba(36, 20, 12, 0.98), rgba(18, 11, 8, 0.98));
+  border: 3px solid #a56c2f;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.28);
+  padding: 18px;
+  text-align: center;
+}
+
+.pause-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.pause-actions button {
+  padding: 10px 14px;
+  background: #6a3d12;
+  border: 3px solid #a56c2f;
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.game-log {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(10, 16, 30, 0.72);
+  border: 2px solid rgba(168, 216, 234, 0.18);
+  text-align: left;
+  min-height: 78px;
+}
+
+.game-log-title {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.game-log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.game-log-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.game-log-nav button {
+  min-width: 28px;
+  min-height: 24px;
+  padding: 0 8px;
+  background: linear-gradient(180deg, rgba(39, 77, 136, 0.98), rgba(19, 40, 75, 0.98));
+  border: 2px solid rgba(168, 216, 234, 0.28);
+  color: var(--ice-bright);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+}
+
+.game-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: rgba(233, 242, 255, 0.86);
+}
+
+.game-log-entry {
+  line-height: 1.35;
+}
+
+.ui-hidden {
+  display: none !important;
+}
+
+.boss-warning {
+  animation: bossPulse 0.7s ease;
+}
+
+.reward-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 420;
+  padding: 22px 18px;
+  background: rgba(8, 5, 4, 0.82);
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.reward-panel.show {
+  display: flex;
+}
+
+.reward-panel > * {
+  pointer-events: auto;
+}
+
+.reward-panel h2,
+.reward-panel > p,
+.reward-panel .reward-grid {
+  width: min(980px, calc(100vw - 36px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.reward-panel h2,
+.reward-panel > p {
+  max-width: 980px;
+}
+
+.reward-panel::before {
+  content: "";
+  position: absolute;
+  width: min(980px, calc(100vw - 36px));
+  max-height: min(82vh, 760px);
+  height: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(180deg, rgba(36, 20, 12, 0.98), rgba(18, 11, 8, 0.98));
+  border: 3px solid #a56c2f;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.28);
+  z-index: -1;
+}
+
+.reward-panel {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reward-panel .reward-grid {
+  max-height: min(56vh, 520px);
+  overflow: auto;
+  padding: 6px;
+}
+
+.reward-panel h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.reward-panel > p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.tutorial-launch {
+  margin: 0 auto 18px;
+  text-align: center;
+}
+
+.tutorial-launch button {
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 2px solid #163f8c;
+  background: linear-gradient(180deg, #4f8df5, #295ec7);
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.72);
+  z-index: 500;
+}
+
+.tutorial-overlay.show {
+  display: flex;
+}
+
+.tutorial-card {
+  width: min(560px, 100%);
+  background: linear-gradient(180deg, #fff9db, #e0ecff);
+  border: 4px solid #1e293b;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.28);
+  text-align: left;
+}
+
+.tutorial-step {
+  font-size: 0.84rem;
+  letter-spacing: 2px;
+  color: #b45309;
+  text-transform: uppercase;
+}
+
+.tutorial-title {
+  margin-top: 8px;
+  font-size: 1.6rem;
+}
+
+.tutorial-body {
+  margin-top: 12px;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.tutorial-points {
+  margin-top: 14px;
+  padding-left: 18px;
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+.tutorial-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.tutorial-actions button {
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  border: 2px solid #1e293b;
+}
+
+.tutorial-secondary {
+  background: #fff;
+  color: #1e293b;
+}
+
+.tutorial-primary {
+  background: linear-gradient(180deg, #facc15, #f59e0b);
+  color: #1f2937;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.battle-panel {
+  background: linear-gradient(180deg, rgba(28, 16, 24, 0.98), rgba(10, 12, 23, 0.96));
+}
+
+/* Pixel-dark fantasy pass */
+body {
+  font-family: "Courier New", monospace;
+  background:
+    linear-gradient(180deg, rgba(18, 4, 4, 0.15), rgba(18, 4, 4, 0.15)),
+    linear-gradient(180deg, #421208 0%, #330d07 100%);
+}
+
+body::before {
+  background: none;
+}
+
+.screen {
+  max-width: 1360px;
+  min-height: 100vh;
+  height: 100vh;
+  padding: 10px 16px 18px;
+  overflow: hidden;
+}
+
+h1 {
+  font-size: 1.35rem;
+  letter-spacing: 0.18em;
+  margin-bottom: 2px;
+}
+
+.subtitle {
+  max-width: 920px;
+  font-size: 0.74rem;
+  opacity: 0.82;
+  margin-bottom: 10px;
+}
+
+.tutorial-launch {
+  margin-bottom: 14px;
+}
+
+.tutorial-launch button,
+.buttons button,
+.cast-button {
+  border-radius: 0;
+  font-family: inherit;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.25);
+}
+
+.tutorial-launch button {
+  background: #6a3d12;
+  border-color: #b1783e;
+}
+
+#mathDifficultyButtons {
+  justify-content: flex-start;
+  margin-bottom: 6px;
+}
+
+#levelButtons {
+  position: static;
+  margin: 0 auto 8px;
+  z-index: auto;
+  gap: 5px;
+  justify-content: center;
+}
+
+#levelButtons button {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1rem;
+  padding: 0;
+  background: #7d5628;
+  border: 4px solid #5d3514;
+  color: #d8d8d8;
+  box-shadow: none;
+}
+
+#levelButtons button + button {
+  margin-left: 0;
+}
+
+.buttons {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.game-area {
+  grid-template-columns: 212px minmax(320px, 1fr) 224px;
+  gap: 14px;
+  align-items: start;
+  margin-top: 6px;
+}
+
+#playerPanel,
+#enemyPanel,
+.duel-panel,
+.wide-panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  backdrop-filter: none;
+}
+
+.wide-panel {
+  display: none;
+}
+
+#playerPanel h2,
+#enemyPanel h2,
+.duel-panel h2 {
+  display: none;
+}
+
+.stats-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  padding: 7px 10px;
+  background: #6a3d12;
+  border: 3px solid #a56c2f;
+  color: #e9f2ff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stats-wrap {
+  display: none;
+  margin-top: 6px;
+}
+
+.stats-wrap.open {
+  display: block;
+}
+
+.card-container {
+  margin-top: 0;
+  width: min(100%, 206px);
+  height: 258px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  overflow: visible;
+}
+
+.card-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, #c5964d 0%, #9f6a2a 8%, #6e3709 18%, #4e2408 100%);
+  border: 6px solid #4f2407;
+  box-shadow:
+    inset 0 0 0 3px #d7b06c,
+    inset 0 0 0 8px #8b4b17,
+    inset 0 0 0 12px #5d2b08,
+    0 0 0 4px rgba(0,0,0,0.08);
+  clip-path: polygon(10% 0, 90% 0, 100% 9%, 100% 91%, 90% 100%, 10% 100%, 0 91%, 0 9%);
+  z-index: 0;
+}
+
+.card-container::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 3px solid rgba(233, 186, 102, 0.22);
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0 12px, transparent 12px 16px),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.03) 0 10px, transparent 10px 14px);
+  clip-path: polygon(10% 0, 90% 0, 100% 9%, 100% 91%, 90% 100%, 10% 100%, 0 91%, 0 9%);
+  z-index: 0;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.card-face {
+  inset: 16px;
+  border-radius: 0;
+  padding: 12px 12px 10px;
+  justify-content: flex-start;
+}
+
+.front {
+  background:
+    linear-gradient(180deg, #d9bf86 0%, #ccb074 4%, #4a89a7 4%, #4a89a7 51%, #70411a 51%, #5f2f0c 100%);
+  border: 0;
+  box-shadow: inset 0 0 0 3px #824313;
+}
+
+.back {
+  background: linear-gradient(180deg, #5f2f0c, #442108);
+  border: 0;
+  box-shadow: inset 0 0 0 4px #824313;
+}
+
+#activeSpellName {
+  display: none;
+}
+
+.question {
+  font-size: 1.2rem;
+  color: #d8d8d8;
+  text-shadow: none;
+  margin: 20px 0 12px;
+}
+
+input {
+  max-width: 390px;
+  width: 100%;
+  background: #b6b6b6;
+  color: #505050;
+  border: 4px solid #8a8a8a;
+  box-shadow: inset -4px -4px 0 #d8d8d8, inset 4px 4px 0 #7a7a7a;
+  font-size: 1.6rem;
+  padding: 18px 14px;
+  border-radius: 0;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+input::placeholder {
+  color: #5d5d5d;
+  text-transform: uppercase;
+}
+
+#playerPanel .card-face.front {
+  align-items: stretch;
+}
+
+#playerPanel .card-face.front > * {
+  text-align: left;
+}
+
+.selected-card-shell {
+  display: grid;
+  grid-template-rows: 54% 46%;
+  gap: 0;
+  height: 100%;
+}
+
+.selected-card-art {
+  min-height: 0;
+  padding: 8px 8px 6px;
+  background: rgba(228, 212, 176, 0.16);
+  border: 3px solid #7b4a1f;
+  box-shadow:
+    inset 0 0 0 2px rgba(237, 202, 126, 0.22),
+    inset 0 -4px 0 rgba(0,0,0,0.14);
+}
+
+.selected-card-copy {
+  min-height: 0;
+  padding: 7px 8px 6px;
+  background: linear-gradient(180deg, rgba(97, 55, 20, 0.96), rgba(59, 28, 9, 0.96));
+  border: 3px solid #7b3c10;
+  border-top: 0;
+  color: #f0e7d8;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: inset 0 0 0 2px rgba(209, 145, 78, 0.18);
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.selected-card-name {
+  font-size: 0.78rem;
+  line-height: 1.15;
+  color: #fff4dd;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+}
+
+.selected-card-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px 6px;
+  background: #3a1b0c;
+  border: 2px solid #9a6a31;
+  font-size: 0.54rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f3cf8e;
+}
+
+.selected-card-text {
+  font-size: 0.64rem;
+  line-height: 1.28;
+  overflow: hidden;
+  color: #f1e7d7;
+}
+
+.selected-card-rules {
+  display: block;
+  font-size: 0.62rem;
+  line-height: 1.18;
+  color: #d6c8b1;
+}
+
+.card-popup-trigger {
+  margin-top: 6px;
+  width: min(100%, 220px);
+  padding: 7px 8px;
+  background: #6a3d12;
+  border: 3px solid #a56c2f;
+  color: #e9f2ff;
+  font-family: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.spell-art {
+  position: relative;
+  overflow: hidden;
+  border: 3px solid rgba(244, 205, 126, 0.24);
+  background:
+    linear-gradient(180deg, rgba(11, 18, 34, 0.8), rgba(26, 12, 18, 0.82)),
+    radial-gradient(circle at 50% 20%, rgba(255, 210, 124, 0.18), transparent 56%);
+  box-shadow: inset 0 0 0 2px rgba(9, 8, 13, 0.45);
+  image-rendering: pixelated;
+}
+
+.spell-art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 12px 12px;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.spell-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.02) 0 6px,
+    rgba(0, 0, 0, 0.14) 6px 12px
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+.spell-art.large {
+  min-height: 100%;
+  height: 100%;
+}
+
+.spell-art.small {
+  height: 110px;
+  margin: 8px 0 10px;
+}
+
+.art-bg,
+.art-core,
+.art-detail,
+.art-ring,
+.art-glow,
+.art-spark,
+.art-accent {
+  position: absolute;
+}
+
+.art-bg {
+  inset: 8% 8%;
+  border-radius: 14px;
+  opacity: 0.88;
+}
+
+.art-core {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.art-detail,
+.art-ring,
+.art-glow,
+.art-spark,
+.art-accent {
+  pointer-events: none;
+}
+
+.art-caption {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(244, 233, 220, 0.76);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.card-copy {
+  display: block;
+  margin-top: 8px;
+  color: #d6cec1;
+  line-height: 1.45;
+}
+
+#playerPanel .cast-button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: rgba(216,216,216,0.5);
+  font-size: 1.15rem;
+  padding: 8px 0;
+}
+
+#playerPanel .cast-button:hover {
+  filter: none;
+  color: #d8d8d8;
+}
+
+#hintPanel {
+  background: rgba(0,0,0,0.32);
+  border: 2px solid rgba(180,180,180,0.14);
+}
+
+.info {
+  width: min(100%, 440px);
+  margin: 8px auto 0;
+  text-align: left;
+  color: #d9d9d9;
+  font-size: 0.82rem;
+}
+
+.info br:nth-of-type(-n+3) {
+  display: none;
+}
+
+#playerHPText,
+#enemyHPText {
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  color: #d8d8d8;
+}
+
+.health-bar {
+  border: none;
+  background: transparent;
+  height: 14px;
+  border-radius: 0;
+  overflow: visible;
+  position: relative;
+}
+
+#playerHealth,
+#enemyHealth {
+  border-radius: 0;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+}
+
+.health-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, rgba(0,0,0,0.2) 0 18px, transparent 18px 22px);
+  pointer-events: none;
+}
+
+#playerHealth {
+  background: #8db14c;
+}
+
+#enemyHealth {
+  background: #ff140a;
+}
+
+#playerPanel {
+  justify-self: start;
+}
+
+#playerPanel #activeSpellName {
+  margin: 0 auto 10px;
+  width: min(100%, 250px);
+  text-align: center;
+}
+
+#enemyPanel {
+  text-align: center;
+  justify-self: end;
+}
+
+.duel-panel {
+  align-self: center;
+  width: 100%;
+  max-width: 420px;
+  justify-self: center;
+}
+
+.duel-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 66px;
+}
+
+.rune-panel {
+  width: 100%;
+  max-width: 420px;
+  padding: 10px 12px;
+  background: rgba(26, 12, 8, 0.88);
+  border: 3px solid #7e4a1d;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.28);
+}
+
+.rune-label {
+  color: #f0d29a;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rune-prompt {
+  margin-top: 6px;
+  color: #d9d4cb;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  min-height: 2.3em;
+}
+
+.rune-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.rune-button {
+  min-height: 46px;
+  border: 3px solid #6b3c17;
+  background: #2e160c;
+  color: #dcd7cf;
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+
+.rune-button:hover {
+  filter: brightness(1.08);
+}
+
+.rune-button.selected {
+  background: #7d3d12;
+  border-color: #db9a46;
+  color: #fff2d8;
+  transform: translate(-1px, -1px);
+}
+
+.rune-readout {
+  margin-top: 8px;
+  color: #bcae97;
+  font-size: 0.68rem;
+  min-height: 1.4em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stance-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.stance-button {
+  min-height: 56px;
+  padding: 6px 8px;
+  border: 3px solid #7e4a1d;
+  background: #3f1c0d;
+  color: #d8d8d8;
+  text-transform: uppercase;
+  font-family: inherit;
+  letter-spacing: 0.08em;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.28);
+  cursor: pointer;
+}
+
+.stance-button strong {
+  display: block;
+  font-size: 0.72rem;
+}
+
+.stance-button span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.5rem;
+  line-height: 1.2;
+  color: rgba(216,216,216,0.72);
+}
+
+.stance-button.selected {
+  background: #7d3d12;
+  border-color: #db9a46;
+  color: #fff1d3;
+  transform: translate(-1px, -1px);
+}
+
+.stance-readout {
+  width: 100%;
+  text-align: center;
+  color: #cda56f;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.duel-panel .question {
+  max-width: 420px;
+  margin: 10px 0 8px;
+}
+
+.duel-panel .cast-button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: rgba(216,216,216,0.5);
+  font-size: 1rem;
+  padding: 4px 0;
+  font-family: inherit;
+}
+
+.duel-panel .cast-button:hover {
+  filter: none;
+  color: #d8d8d8;
+}
+
+.enemy-card {
+  display: none;
+}
+
+.enemy-stage {
+  position: relative;
+  width: 208px;
+  height: 258px;
+  margin: 10px auto 8px;
+  image-rendering: pixelated;
+  filter: drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.26));
+}
+
+.enemy-stage::before {
+  content: "";
+  position: absolute;
+  inset: 22px 16px 26px;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,0.02) 0 8px, rgba(0,0,0,0.18) 8px 16px),
+    radial-gradient(circle at 50% 28%, rgba(171, 77, 29, 0.18), transparent 56%);
+  border: 3px solid rgba(126, 74, 29, 0.42);
+  pointer-events: none;
+}
+
+.enemy-stage.shake {
+  animation: panelShake 0.18s steps(2);
+}
+
+.enemy-stage.phase-flash::after {
+  content: "";
+  position: absolute;
+  inset: 18px 12px 22px;
+  border: 4px solid rgba(255, 193, 96, 0.72);
+  animation: pixelPulse 0.4s steps(3);
+  pointer-events: none;
+}
+
+.enemy-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 128px;
+  height: 54px;
+  transform: translateX(-50%);
+  background: #363636;
+  border-radius: 50%;
+}
+
+.enemy-sprite {
+  position: absolute;
+  left: 50%;
+  bottom: 50px;
+  width: 82px;
+  height: 160px;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  filter: saturate(0.98) contrast(1.08) drop-shadow(4px 4px 0 rgba(0,0,0,0.34));
+}
+
+.enemy-sprite.hit {
+  animation: spriteJolt 0.18s steps(2);
+}
+
+.enemy-sprite.attack {
+  animation: spriteLunge 0.22s steps(2);
+}
+
+.enemy-sprite.phase-2 {
+  filter: saturate(1.08) contrast(1.08) brightness(1.08);
+}
+
+.enemy-sprite.phase-3 {
+  filter: saturate(1.15) contrast(1.14) brightness(1.14);
+}
+
+.floating-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.floating-text {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, 0);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f0e5d2;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.72);
+  animation: floatFade 0.9s steps(8) forwards;
+  white-space: nowrap;
+}
+
+.floating-text.damage {
+  color: #ff7f6c;
+}
+
+.floating-text.heal {
+  color: #9fd87c;
+}
+
+.floating-text.buff {
+  color: #f2cb7f;
+}
+
+.floating-text.phase {
+  color: #ffd89c;
+  top: 30%;
+}
+
+.enemy-sprite .part {
+  position: absolute;
+  image-rendering: pixelated;
+}
+
+.enemy-sprite .head {
+  width: 22px;
+  height: 18px;
+  left: 36px;
+  top: 0;
+  background: #c6bf3d;
+  box-shadow: 0 0 0 4px #776d18;
+}
+
+.enemy-sprite .torso {
+  width: 46px;
+  height: 60px;
+  left: 24px;
+  top: 20px;
+  background: #5a2b08;
+  box-shadow: 0 0 0 6px #4a2105;
+}
+
+.enemy-sprite .arm-left,
+.enemy-sprite .arm-right {
+  width: 12px;
+  height: 56px;
+  top: 34px;
+  background: #c6bf3d;
+}
+
+.enemy-sprite .arm-left {
+  left: 10px;
+  transform: rotate(20deg);
+}
+
+.enemy-sprite .arm-right {
+  right: 8px;
+  transform: rotate(-8deg);
+}
+
+.enemy-sprite .blade {
+  width: 10px;
+  height: 54px;
+  left: -18px;
+  top: 58px;
+  background: #c7c7c7;
+  transform: rotate(42deg);
+  box-shadow: 0 0 0 2px #8a8a8a;
+}
+
+.enemy-sprite .leg-left,
+.enemy-sprite .leg-right {
+  width: 16px;
+  height: 68px;
+  top: 92px;
+  background: #6f4b23;
+}
+
+.enemy-sprite .leg-left {
+  left: 30px;
+  transform: rotate(6deg);
+}
+
+.enemy-sprite .leg-right {
+  right: 24px;
+  transform: rotate(-4deg);
+}
+
+.enemy-sprite .foot-left,
+.enemy-sprite .foot-right {
+  width: 26px;
+  height: 12px;
+  top: 158px;
+  background: #b28753;
+}
+
+.enemy-sprite .foot-left { left: 20px; }
+.enemy-sprite .foot-right { right: 12px; }
+
+.enemy-sprite .horn-left,
+.enemy-sprite .horn-right,
+.enemy-sprite .cloak,
+.enemy-sprite .tail,
+.enemy-sprite .aura {
+  display: none;
+}
+
+.enemy-sprite.model-goblin .head {
+  background: #c6bf3d;
+  box-shadow: 0 0 0 4px #776d18;
+}
+
+.enemy-sprite.model-goblin .torso {
+  background: #5a2b08;
+  box-shadow: 0 0 0 6px #4a2105;
+}
+
+.enemy-sprite.model-bone .head {
+  width: 24px;
+  height: 20px;
+  left: 35px;
+  background: #d8d4cb;
+  box-shadow: 0 0 0 4px #8e8a84;
+}
+
+.enemy-sprite.model-bone .torso {
+  width: 42px;
+  left: 26px;
+  background: #4e525d;
+  box-shadow: 0 0 0 6px #2d313b;
+}
+
+.enemy-sprite.model-bone .arm-left,
+.enemy-sprite.model-bone .arm-right,
+.enemy-sprite.model-bone .leg-left,
+.enemy-sprite.model-bone .leg-right {
+  background: #d8d4cb;
+}
+
+.enemy-sprite.model-bone .blade {
+  height: 62px;
+  background: #f0f3f7;
+  box-shadow: 0 0 0 2px #9199a1;
+}
+
+.enemy-sprite.model-witch .head {
+  width: 18px;
+  height: 22px;
+  left: 38px;
+  background: #89b06a;
+  box-shadow: 0 0 0 4px #4d6a39;
+}
+
+.enemy-sprite.model-witch .torso {
+  width: 50px;
+  height: 66px;
+  left: 22px;
+  background: #4f274d;
+  box-shadow: 0 0 0 6px #2d1230;
+}
+
+.enemy-sprite.model-witch .arm-left,
+.enemy-sprite.model-witch .arm-right {
+  background: #89b06a;
+}
+
+.enemy-sprite.model-witch .blade {
+  display: none;
+}
+
+.enemy-sprite.model-witch .cloak {
+  display: block;
+  width: 76px;
+  height: 88px;
+  left: 9px;
+  top: 36px;
+  background: #2c1430;
+  clip-path: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+}
+
+.enemy-sprite.model-drake .head {
+  width: 28px;
+  height: 20px;
+  left: 33px;
+  background: #d57b28;
+  box-shadow: 0 0 0 4px #79310c;
+}
+
+.enemy-sprite.model-drake .torso {
+  width: 54px;
+  height: 74px;
+  left: 20px;
+  background: #7b2e0f;
+  box-shadow: 0 0 0 6px #4b1808;
+}
+
+.enemy-sprite.model-drake .arm-left,
+.enemy-sprite.model-drake .arm-right {
+  width: 18px;
+  height: 64px;
+  background: #d57b28;
+}
+
+.enemy-sprite.model-drake .blade {
+  display: none;
+}
+
+.enemy-sprite.model-drake .horn-left,
+.enemy-sprite.model-drake .horn-right {
+  display: block;
+  width: 10px;
+  height: 24px;
+  top: -10px;
+  background: #d8c15a;
+}
+
+.enemy-sprite.model-drake .horn-left {
+  left: 24px;
+  transform: rotate(-28deg);
+}
+
+.enemy-sprite.model-drake .horn-right {
+  right: 20px;
+  transform: rotate(28deg);
+}
+
+.enemy-sprite.model-drake .tail {
+  display: block;
+  width: 18px;
+  height: 76px;
+  right: -8px;
+  top: 84px;
+  background: #d57b28;
+  transform: rotate(-26deg);
+}
+
+.enemy-sprite.model-titan {
+  width: 122px;
+  height: 210px;
+}
+
+.enemy-sprite.model-titan .head {
+  width: 28px;
+  height: 24px;
+  left: 47px;
+  background: #8a7df0;
+  box-shadow: 0 0 0 4px #43387c;
+}
+
+.enemy-sprite.model-titan .torso {
+  width: 66px;
+  height: 84px;
+  left: 28px;
+  background: #31255a;
+  box-shadow: 0 0 0 8px #161125;
+}
+
+.enemy-sprite.model-titan .arm-left,
+.enemy-sprite.model-titan .arm-right {
+  width: 18px;
+  height: 78px;
+  top: 36px;
+  background: #8a7df0;
+}
+
+.enemy-sprite.model-titan .leg-left,
+.enemy-sprite.model-titan .leg-right {
+  width: 20px;
+  height: 82px;
+  top: 104px;
+  background: #40335f;
+}
+
+.enemy-sprite.model-titan .foot-left,
+.enemy-sprite.model-titan .foot-right {
+  width: 30px;
+  height: 14px;
+  top: 184px;
+  background: #7567c4;
+}
+
+.enemy-sprite.model-titan .blade {
+  display: none;
+}
+
+.enemy-sprite.model-titan .aura {
+  display: block;
+  width: 132px;
+  height: 132px;
+  left: -5px;
+  top: 18px;
+  border: 4px solid rgba(138, 125, 240, 0.42);
+  border-radius: 50%;
+}
+
+#enemyName {
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  color: #d8d8d8;
+  margin-bottom: 10px;
+}
+
+#enemyFlavor,
+#enemyStatsPanel,
+#enemyAttackText,
+#enemyIntentText,
+#combatFeed,
+#statusText {
+  color: rgba(216,216,216,0.58);
+}
+
+#enemyStatsPanel {
+  background: transparent;
+  border: none;
+  padding: 4px 0 10px;
+  text-align: center;
+}
+
+#statusText,
+#combatFeed {
+  width: 250px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.spell-book {
+  margin-top: 0;
+}
+
+.spell-book h2 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+.relic-strip {
+  margin-top: 18px;
+  padding: 12px;
+  background: linear-gradient(180deg, #24140c, #120b08);
+  border: 3px solid #a56c2f;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.25);
+  text-align: left;
+}
+
+.relic-strip h2 {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+.relic-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.relic-chip {
+  min-width: 58px;
+  padding: 8px 10px;
+  border: 3px solid #7e4a1d;
+  background: #2b140b;
+  color: #e8dcc8;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.22);
+  text-align: center;
+}
+
+.relic-chip strong {
+  display: block;
+  font-size: 0.68rem;
+  color: #f1d28b;
+  letter-spacing: 0.08em;
+}
+
+.relic-chip span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.58rem;
+  color: rgba(232,220,200,0.76);
+}
+
+.phase-banner {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 20;
+  min-width: 220px;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, #5d220f, #2a1208);
+  border: 3px solid #e0a257;
+  color: #fff0d4;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.28);
+  text-align: left;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.phase-banner.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.phase-banner strong {
+  display: block;
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.phase-banner span {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.65rem;
+  line-height: 1.45;
+  color: rgba(255,240,212,0.82);
+}
+
+.attack-banner {
+  position: fixed;
+  left: 50%;
+  top: 90px;
+  transform: translateX(-50%) translateY(-8px);
+  min-width: 240px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #40150f, #1f0b08);
+  border: 3px solid #d07c4c;
+  color: #ffe7c6;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.28);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  z-index: 35;
+}
+
+.attack-banner.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.attack-banner strong {
+  display: block;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.attack-banner span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.68rem;
+  color: rgba(255,231,198,0.82);
+}
+
+.spell-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.overlay-panel {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 6, 12, 0.82);
+  z-index: 30;
+  padding: 20px;
+}
+
+.overlay-panel.show {
+  display: flex;
+}
+
+.overlay-card {
+  width: min(860px, 100%);
+  max-height: min(88vh, 860px);
+  overflow: auto;
+  background: linear-gradient(180deg, #24140c, #120b08);
+  border: 3px solid #a56c2f;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.28);
+  padding: 18px;
+}
+
+.overlay-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.overlay-title {
+  color: #f0d28a;
+  font-size: 1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.overlay-close {
+  background: #6a3d12;
+  border: 3px solid #a56c2f;
+  color: #fff;
+  font-family: inherit;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.card-popup-body {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 14px;
+  text-align: left;
+  align-items: start;
+}
+
+.card-popup-art {
+  min-height: 320px;
+  padding: 10px;
+  background: rgba(228, 212, 176, 0.12);
+  border: 3px solid #7b4a1f;
+  box-shadow:
+    inset 0 0 0 2px rgba(237, 202, 126, 0.22),
+    inset 0 -4px 0 rgba(0,0,0,0.14);
+}
+
+.card-popup-art .spell-art {
+  width: 100%;
+  min-height: 296px;
+  height: 296px;
+}
+
+.card-popup-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(32, 15, 5, 0.76);
+  border: 3px solid #7b3c10;
+  min-height: 320px;
+  min-width: 0;
+}
+
+.card-popup-copy .selected-card-rules {
+  line-height: 1.6;
+  word-break: break-word;
+  display: block;
+}
+
+.compact-relics .relic-row {
+  margin-top: 4px;
+}
+
+.compact-relics .relic-chip {
+  min-width: 48px;
+  padding: 6px 8px;
+}
+
+.spell-button {
+  min-height: 190px;
+  background:
+    linear-gradient(180deg, #b99352 0%, #90652f 8%, #24140c 8%, #120b08 100%);
+  border: 3px solid #a56c2f;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.25);
+}
+
+.spell-button.rank-3,
+.selected-card-shell.rank-3 {
+  box-shadow: 0 0 0 2px rgba(137, 205, 255, 0.18), 6px 6px 0 rgba(0,0,0,0.25);
+  border-color: #8cc8ff;
+}
+
+.spell-button.rank-5,
+.selected-card-shell.rank-5 {
+  box-shadow: 0 0 0 2px rgba(255, 212, 116, 0.25), 0 0 18px rgba(255, 185, 75, 0.18), 6px 6px 0 rgba(0,0,0,0.25);
+  border-color: #f0c96a;
+}
+
+.spell-button.selected {
+  border-color: #e8c96a;
+  box-shadow: 0 0 0 2px rgba(232,201,106,0.18), 6px 6px 0 rgba(0,0,0,0.25);
+}
+
+.card-rarity {
+  color: #f0d28a;
+}
+
+.card-title {
+  color: #f1efe8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.level-requirement {
+  display: inline-block;
+  margin: 4px 0 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(232, 201, 106, 0.18);
+  border: 1px solid rgba(232, 201, 106, 0.45);
+  color: #f6d98d;
+  font-size: 0.78rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card-meta {
+  color: rgba(233,242,255,0.74);
+}
+
+.reward-panel,
+.tutorial-card {
+  border-radius: 0;
+  background: linear-gradient(180deg, #24140c, #120b08);
+  border: 3px solid #a56c2f;
+  color: #e9f2ff;
+}
+
+.tutorial-title,
+.tutorial-body,
+.tutorial-points,
+.tutorial-step {
+  color: #e9f2ff;
+}
+
+.tutorial-primary,
+.tutorial-secondary {
+  border-radius: 0;
+  font-family: inherit;
+}
+
+@media (max-width: 980px) {
+  .game-area {
+    grid-template-columns: 1fr;
+  }
+
+  .card-popup-body {
+    grid-template-columns: 1fr;
+  }
+
+  .card-popup-art,
+  .card-popup-copy {
+    min-height: 0;
+  }
+
+  #enemyPanel,
+  #playerPanel {
+    justify-self: center;
+  }
+
+  #levelButtons {
+    position: static;
+    margin-top: 14px;
+  }
+
+  .screen {
+    padding-bottom: 40px;
+  }
+}
+
+@keyframes panelShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-3px); }
+}
+
+@keyframes critFlash {
+  0% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
+  40% { box-shadow: 0 0 22px rgba(250, 204, 21, 0.95); }
+  100% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
+}
+
+@keyframes floatFade {
+  0% { opacity: 0; transform: translate(-50%, 10px); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -24px); }
+}
+
+@keyframes spriteJolt {
+  0%, 100% { transform: translateX(-50%); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+
+@keyframes spriteLunge {
+  0%, 100% { transform: translateX(-50%); }
+  50% { transform: translateX(-42%) translateY(-1px); }
+}
+
+@keyframes pixelPulse {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes bossPulse {
+  0% { box-shadow: 0 0 0 rgba(255, 116, 72, 0); }
+  45% { box-shadow: 0 0 28px rgba(255, 116, 72, 0.75); }
+  100% { box-shadow: 0 0 0 rgba(255, 116, 72, 0); }
+}
+</style>
+</head>
+<body>
+<div class="screen">
+  <h1>Areen</h1>
+  <p class="subtitle">
+     </p>
+  <div class="top-bar">
+    <button class="settings-toggle" type="button" id="settingsToggle" onclick="toggleSettings()">Open Settings</button>
+    <button class="settings-toggle" type="button" id="collectionToggle" onclick="toggleCollection()">Open Cards & Relics</button>
+    <button class="settings-toggle" type="button" id="devToggle" onclick="toggleDevPanel()" hidden aria-hidden="true">Open Dev</button>
+    <button class="settings-toggle pause-toggle" type="button" id="pauseToggle" onclick="togglePauseMenu()">Menu</button>
+    <button class="settings-toggle" type="button" onclick="openTutorial(true)">How To Play</button>
+  </div>
+  <section class="settings-panel" id="settingsPanel">
+      <div class="settings-title">Settings</div>
+      <div class="settings-grid">
+        <div class="settings-group">
+          <div class="settings-label">Challenge Level</div>
+          <div class="settings-note">Use the `1-5` level buttons above the math prompt to choose your challenge.</div>
+        </div>
+      </div>
+  </section>
+
+  <section class="collection-panel" id="collectionPanel">
+    <div class="settings-title">Cards & Relics</div>
+    <div class="settings-grid">
+      <div class="settings-group">
+        <div class="settings-label">Cards</div>
+        <div class="settings-actions">
+          <button type="button" onclick="openSpellbookPopup()">Spellbook</button>
+          <button type="button" onclick="openCardPopup()">Card Details</button>
+        </div>
+        <div class="settings-note">Open your full spellbook or inspect the currently drawn card.</div>
+      </div>
+      <div class="settings-group compact-relics">
+        <div class="settings-label">Relics</div>
+        <div class="relic-row" id="relicRow">
+          <div class="relic-chip"><strong>None</strong><span>No relics yet</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dev-panel" id="devPanel">
+    <div class="settings-title">Dev Controls</div>
+    <div class="settings-grid">
+      <div class="settings-group">
+        <div class="settings-label">Round Skips</div>
+        <div class="settings-actions">
+          <button type="button" onclick="devAdvanceBattles(1)">Skip 1 Round</button>
+          <button type="button" onclick="devAdvanceBattles(5)">Skip 5 Rounds</button>
+          <button type="button" onclick="devJumpToBoss()">Next Boss</button>
+        </div>
+        <div class="settings-note">Use this hidden panel to jump ahead without opening reward or boss screens by hand.</div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-label">Safety Tools</div>
+        <div class="settings-actions">
+          <button type="button" onclick="devHealFull()">Heal Full</button>
+          <button type="button" onclick="devRerollEnemy()">Reroll Enemy</button>
+        </div>
+        <div class="settings-note">Quick recovery and enemy refresh tools for testing later fights faster.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="game-area">
+    <div class="panel" id="playerPanel">
+      <h2>Mage</h2>
+      <h3 id="activeSpellName" class="ui-hidden">Choose a spell</h3>
+      <div class="card-container">
+        <div class="floating-layer" id="playerFloaters"></div>
+        <div class="card" id="playerCard">
+          <div class="card-face front">
+            <div class="selected-card-shell">
+              <div class="selected-card-art" id="selectedCardArt" aria-hidden="true"></div>
+              <div class="selected-card-copy">
+                <div class="selected-card-tag" id="selectedCardTag">Arcane Draft</div>
+                <div class="selected-card-name" id="selectedCardName">Choose a spell</div>
+                <div class="selected-card-text" id="selectedCardText">Choose a spell to reveal its art and purpose.</div>
+                <div class="selected-card-rules" id="selectedCardRules">Its combat identity and permanent bonuses will appear here.</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-face back"></div>
+        </div>
+      </div>
+      <button class="card-popup-trigger" type="button" onclick="openCardPopup()">Card Details</button>
+      <div class="health-bar"><div class="health-fill" id="playerHealth"></div></div>
+      <div id="playerHPText">HP: 180 / 180</div>
+      <button class="stats-toggle" type="button" onclick="toggleStats('player')">Player Stats</button>
+      <div class="stats-wrap" id="playerStatsWrap">
+        <div class="stat-list" id="playerStatsPanel"></div>
+      </div>
+
+      <div class="info">
+        Level: <span id="level">-</span><br>
+        Battle: <span id="battleCount">1</span>
+      </div>
+      <div class="turn-order" id="turnOrder">Your Turn -> Solve and cast</div>
+      <p class="status" id="statusText">Solve the math and cast.</p>
+      <div class="combat-feed" id="combatFeed">The duel is ready.</div>
+      <div class="game-log">
+        <div class="game-log-head">
+          <div class="game-log-title">Game Log</div>
+          <div class="game-log-nav">
+            <button type="button" onclick="stepGameLog(-1)"><</button>
+            <button type="button" onclick="stepGameLog(1)">></button>
+          </div>
+        </div>
+        <div class="game-log-list" id="gameLog">
+          <div class="game-log-entry">The duel is ready.</div>
+        </div>
+      </div>
+      <div class="ui-hidden">
+        <span id="score">0</span>
+        <span id="cardsEarned">1</span>
+      </div>
+    </div>
+
+    <div class="panel duel-panel" id="duelPanel">
+      <div class="duel-stack">
+        <div class="buttons" id="levelButtons">
+          <button onclick="chooseLevel(1)">1</button>
+          <button onclick="chooseLevel(2)">2</button>
+          <button onclick="chooseLevel(3)">3</button>
+          <button onclick="chooseLevel(4)">4</button>
+          <button onclick="chooseLevel(5)">5</button>
+        </div>
+        <div id="question" class="question">Pick a level and a spell card</div>
+        <div class="stance-readout ui-hidden" id="questionTwist">Ritual Twist: None</div>
+        <div class="stance-row">
+          <button class="stance-button selected" id="stance-burst" type="button" onclick="selectStance('burst')">
+            <strong>Burst</strong>
+            <span>More damage and crit, but backlash hits harder.</span>
+          </button>
+          <button class="stance-button" id="stance-guard" type="button" onclick="selectStance('guard')">
+            <strong>Guard</strong>
+            <span>Lower damage, gain barrier, and soften enemy hits.</span>
+          </button>
+          <button class="stance-button" id="stance-siphon" type="button" onclick="selectStance('siphon')">
+            <strong>Siphon</strong>
+            <span>Trade burst for healing, focus, and safer recovery.</span>
+          </button>
+        </div>
+        <div class="stance-readout" id="stanceReadout">Ritual Stance: Burst | Combo 0</div>
+        <input id="answer" type="number" placeholder="Answer">
+        <button class="cast-button" id="castSpellButton" onclick="submitAnswer()">Cast Spell</button>
+        <button class="cast-button" onclick="toggleHint()">Hint / Steps</button>
+        <p class="hint ui-hidden">Selected spell damage: <span id="spellDamage">0</span></p>
+        <div class="stat-list" id="hintPanel" style="display: none; margin-top: 10px;"></div>
+      </div>
+    </div>
+
+    <div class="panel battle-panel" id="enemyPanel">
+      <h2>Dark Foe</h2>
+      <h3 id="enemyName">Goblin Scout</h3>
+      <div class="enemy-stage">
+        <div class="floating-layer" id="enemyFloaters"></div>
+        <div class="enemy-shadow"></div>
+        <div class="enemy-sprite">
+          <div class="part aura"></div>
+          <div class="part horn-left"></div>
+          <div class="part horn-right"></div>
+          <div class="part head"></div>
+          <div class="part cloak"></div>
+          <div class="part torso"></div>
+          <div class="part arm-left"></div>
+          <div class="part arm-right"></div>
+          <div class="part blade"></div>
+          <div class="part leg-left"></div>
+          <div class="part leg-right"></div>
+          <div class="part tail"></div>
+          <div class="part foot-left"></div>
+          <div class="part foot-right"></div>
+        </div>
+      </div>
+      <div class="card-face enemy-card" style="position: relative; inset: auto;">
+        <p id="enemyFlavor">A sneaky foe blocks your path.</p>
+      </div>
+      <button class="stats-toggle" type="button" onclick="toggleStats('enemy')">Enemy Stats</button>
+      <div class="stats-wrap" id="enemyStatsWrap">
+        <div class="stat-list" id="enemyStatsPanel"></div>
+      </div>
+      <div class="health-bar"><div class="health-fill" id="enemyHealth"></div></div>
+      <div id="enemyHPText">HP: 150 / 150</div>
+      <div id="enemyIntentChip" class="intent-chip attack">Attack</div>
+      <div id="enemyIntentText" class="hint">Intent: Testing strike</div>
+      <div id="enemyAttackText" class="hint ui-hidden">Enemy attack: 10</div>
+    </div>
+  </div>
+
+  <section class="reward-panel" id="rewardPanel">
+    <h2>Choose Your Reward</h2>
+    <p class="hint">Choose an enchanted card or occasional potion. Its blessings are added to your mage immediately.</p>
+    <div class="reward-grid" id="rewardGrid"></div>
+  </section>
+
+  <section class="reward-panel" id="deathPanel">
+    <h2>Choose A Death Blessing</h2>
+    <p class="hint">Defeat has forged your mage. Choose how your next run grows stronger.</p>
+    <div class="reward-grid" id="deathGrid"></div>
+  </section>
+
+  <section class="reward-panel" id="milestonePanel">
+    <h2>Choose A Milestone Boon</h2>
+    <p class="hint">A rare pause in the climb. Pick one lasting edge for the next stretch.</p>
+    <div class="reward-grid" id="milestoneGrid"></div>
+  </section>
+
+  <section class="reward-panel" id="relicPanel">
+    <h2>Choose A Relic</h2>
+    <p class="hint">Bosses and hidden chambers can uncover artifacts that permanently reshape the run.</p>
+    <div class="reward-grid" id="relicGrid"></div>
+  </section>
+</div>
+
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-card">
+    <div class="tutorial-step" id="tutorialStepLabel">Step 1 of 3</div>
+    <div class="tutorial-title" id="tutorialTitle">Welcome to the duel</div>
+    <div class="tutorial-body" id="tutorialBody"></div>
+    <ul class="tutorial-points" id="tutorialPoints"></ul>
+    <div class="tutorial-actions">
+      <button class="tutorial-secondary" type="button" id="tutorialSkip">Skip</button>
+      <button class="tutorial-primary" type="button" id="tutorialNext">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="phase-banner" id="phaseBanner">
+  <strong id="phaseBannerTitle">Phase Shift</strong>
+  <span id="phaseBannerText">A new threat is building.</span>
+</div>
+
+<div class="attack-banner" id="attackBanner">
+  <strong id="attackBannerTitle">Enemy Attack</strong>
+  <span id="attackBannerText">The foe is about to strike.</span>
+</div>
+
+<div class="pause-panel" id="pausePanel">
+  <div class="pause-card">
+    <h2>Pause Menu</h2>
+    <p class="hint">Take a breath, review the game, or restart this run.</p>
+    <div class="pause-actions">
+      <button type="button" onclick="togglePauseMenu()">Resume</button>
+      <button type="button" onclick="openTutorial(true); togglePauseMenu(false);">How To Play</button>
+      <button type="button" onclick="togglePauseMenu(false); resetRun();">Restart Run</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay-panel" id="spellbookPopup">
+  <div class="overlay-card">
+    <div class="overlay-head">
+      <div class="overlay-title">Spellbook</div>
+      <button class="overlay-close" type="button" onclick="closeSpellbookPopup()">Close</button>
+    </div>
+    <p class="hint">Each card adds permanent bonuses to the run. In combat, a random playable card is drawn from your owned spellbook each cast.</p>
+    <div class="spell-grid" id="spellGrid"></div>
+  </div>
+</div>
+
+<div class="overlay-panel" id="cardPopup">
+  <div class="overlay-card">
+    <div class="overlay-head">
+      <div class="overlay-title" id="cardPopupTitle">Card</div>
+      <button class="overlay-close" type="button" onclick="closeCardPopup()">Close</button>
+    </div>
+    <div class="card-popup-body">
+      <div id="cardPopupArt" class="card-popup-art"></div>
+      <div class="card-popup-copy">
+        <div class="selected-card-tag" id="cardPopupTag">Arcane Draft</div>
+        <div class="selected-card-name" id="cardPopupName">Choose a spell</div>
+        <div class="selected-card-text" id="cardPopupText">Card details will appear here.</div>
+        <div class="selected-card-rules" id="cardPopupRules">Rules text will appear here.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const embedMode = urlParams.get("embed") === "1";
+const embedEnemyConfig = embedMode ? {
+  name: urlParams.get("enemyName") || "Arena Foe",
+  sprite: urlParams.get("enemySprite") || "goblin",
+  flavor: urlParams.get("enemyFlavor") || "A foe from the frozen wild steps into your path.",
+  maxHP: Number(urlParams.get("enemyHP") || 150),
+  attack: Number(urlParams.get("enemyAttack") || 10),
+  armor: Number(urlParams.get("enemyArmor") || 1),
+  thorns: Number(urlParams.get("enemyThorns") || 0),
+  fury: Number(urlParams.get("enemyFury") || 0),
+  bonusText: urlParams.get("enemyBonus") || "A summoned foe tests your spellcraft."
+} : null;
+
+const spellPool = [
+  { id: "spark", name: "Spark Shot", rarity: "Common", minLevel: 1, baseDamage: 3, crit: 3, lifesteal: 0, vitality: 0, power: 0, ward: 1, focus: 0, text: "A fast ember bolt for quick hits and a little ward." },
+  { id: "ember", name: "Ember Burst", rarity: "Common", minLevel: 1, baseDamage: 6, crit: 4, lifesteal: 0, vitality: 0, power: 1, ward: 0, focus: 0, text: "A simple fire burst that hits harder on strong casts." },
+  { id: "moss", name: "Moss Guard", rarity: "Common", minLevel: 1, baseDamage: 2, crit: 2, lifesteal: 8, vitality: 14, power: 0, ward: 2, focus: 0, text: "Living bark magic that heals you and builds defense." },
+  { id: "frost", name: "Frost Sigil", rarity: "Rare", minLevel: 2, baseDamage: 7, crit: 5, lifesteal: 0, vitality: 0, power: 1, ward: 1, focus: 1, text: "A cold rune that damages and slows the enemy." },
+  { id: "storm", name: "Storm Chain", rarity: "Rare", minLevel: 3, baseDamage: 10, crit: 8, lifesteal: 0, vitality: 0, power: 2, ward: 0, focus: 2, text: "Chain lightning that shines with high crit power." },
+  { id: "prism", name: "Prism Bloom", rarity: "Rare", minLevel: 2, baseDamage: 5, crit: 4, lifesteal: 10, vitality: 12, power: 0, ward: 1, focus: 1, text: "A bright bloom that balances healing and steady growth." },
+  { id: "nova", name: "Sun Nova", rarity: "Epic", minLevel: 4, baseDamage: 14, crit: 10, lifesteal: 0, vitality: 0, power: 3, ward: 0, focus: 2, text: "A bright blast that breaks armor and hits hard." },
+  { id: "aegis", name: "Aegis Rune", rarity: "Epic", minLevel: 3, baseDamage: 6, crit: 3, lifesteal: 0, vitality: 16, power: 0, ward: 4, focus: 0, text: "A shield rune that stacks thick barrier and health." },
+  { id: "void", name: "Void Lantern", rarity: "Epic", minLevel: 4, baseDamage: 11, crit: 12, lifesteal: 9, vitality: 4, power: 2, ward: 0, focus: 3, text: "Dark light that steals life when it lands." },
+  { id: "meteor", name: "Meteor Crown", rarity: "Legendary", minLevel: 4, baseDamage: 18, crit: 14, lifesteal: 0, vitality: 0, power: 4, ward: 0, focus: 3, text: "A falling-star strike that punishes healthy enemies." },
+  { id: "oracle", name: "Oracle Glass", rarity: "Legendary", minLevel: 4, baseDamage: 9, crit: 18, lifesteal: 14, vitality: 16, power: 1, ward: 1, focus: 4, text: "A moonlit lens that boosts crits and healing." }
+];
+
+const enemyRoster = [
+  { name: "Goblin Scout", sprite: "goblin", flavor: "A sneaky foe blocks your path.", maxHP: 150, attack: 10, armor: 1, thorns: 0, fury: 0, bonusText: "Light armor. Fast but flimsy.", phaseTwoText: "it darts into a dodge-heavy knife rush.", phaseThreeText: "it goes desperate and stabs in a blur." },
+  { name: "Bone Knight", sprite: "bone", flavor: "A restless warrior rises from the ruins.", maxHP: 180, attack: 12, armor: 3, thorns: 1, fury: 0, bonusText: "Heavy armor and bone spikes.", phaseTwoText: "its shield wall hardens around old bones.", phaseThreeText: "it grinds forward with relentless grave-metal blows." },
+  { name: "Swamp Witch", sprite: "witch", flavor: "Hexes twist the air around her.", maxHP: 160, attack: 11, armor: 1, thorns: 0, fury: 2, bonusText: "Fury makes her hits surge unpredictably.", phaseTwoText: "her curses begin to rot your healing.", phaseThreeText: "her bog magic lashes out in ruthless hex waves." },
+  { name: "Ash Drake", sprite: "drake", flavor: "Its scales glow like a dying forge.", maxHP: 190, attack: 13, armor: 2, thorns: 2, fury: 1, bonusText: "Flaming thorns punish every clean hit.", phaseTwoText: "embers gather in its throat for heavier breaths.", phaseThreeText: "the drake erupts into a furnace of claws and fire." },
+  { name: "Void Titan", sprite: "titan", flavor: "A towering nightmare waits at the gate.", maxHP: 220, attack: 15, armor: 4, thorns: 2, fury: 2, bonusText: "Massive armor, brutal force, no mercy.", phaseTwoText: "the titan tears open a deeper void aura.", phaseThreeText: "its final form crashes down like a living cataclysm." },
+  { name: "Blood Archivist", sprite: "witch", flavor: "A ritual keeper studies every mistake you make.", maxHP: 205, attack: 14, armor: 2, thorns: 1, fury: 2, bonusText: "Punishes long fights with curses and pressure.", phaseTwoText: "its forbidden notes begin draining your tempo.", phaseThreeText: "its ritual reaches a fever pitch." },
+  { name: "Thorn Behemoth", sprite: "drake", flavor: "A root-beast drags half the forest into the arena.", maxHP: 235, attack: 16, armor: 3, thorns: 3, fury: 1, bonusText: "Big body, heavy thorns, and rising pressure.", phaseTwoText: "its bark plates harden into a brutal wall.", phaseThreeText: "it lashes out in a storm of roots and spikes." }
+];
+
+const potionPool = [
+  { id: "potion-crimson", type: "potion", name: "Crimson Vitality Draught", rarity: "Potion", health: 45, vitality: 10, power: 0, ward: 0, focus: 0, lifesteal: 0, text: "A ruby tonic that restores health and hardens your life force." },
+  { id: "potion-sage", type: "potion", name: "Sagefire Elixir", rarity: "Potion", health: 28, vitality: 0, power: 2, ward: 0, focus: 1, lifesteal: 4, text: "A glowing brew that sharpens spellwork and leaves healing sparks behind." },
+  { id: "potion-aegis", type: "potion", name: "Moonshield Philter", rarity: "Potion", health: 32, vitality: 6, power: 0, ward: 2, focus: 0, lifesteal: 0, text: "Silver dust swirls through this potion, wrapping you in a lasting ward." }
+];
+
+const relicPool = [
+  { id: "relic-ember", name: "Ashen Sigil", line1: "Power +2 | Fire spells burn harder", line2: "Burn +2 on blazing spells", text: "A coal-black seal that makes every ember cling to the battlefield.", apply() { relicBonuses.power += 2; relicBonuses.burnBoost += 2; } },
+  { id: "relic-mirror", name: "Mirror Ward", line1: "Ward +2 | Reflect damage reduced", line2: "Barrier gain +2", text: "A cracked ward mirror that bends some backlash away from the mage.", apply() { relicBonuses.ward += 2; relicBonuses.barrier += 2; } },
+  { id: "relic-lantern", name: "Moon Lantern", line1: "Focus +2 | Lifesteal +5%", line2: "Cleanse one curse after victory", text: "A pale lantern that rewards precision with recovery and clarity.", apply() { relicBonuses.focus += 2; relicBonuses.lifesteal += 5; relicBonuses.cleanse = true; } },
+  { id: "relic-root", name: "Root Crown", line1: "Vitality +16 | Boss blows softened", line2: "Boss Ward +2", text: "Old roots harden the run into something much harder to break.", apply() { relicBonuses.vitality += 16; relicBonuses.bossWard += 2; } },
+  { id: "relic-rift", name: "Rift Fang", line1: "Crit +6% | Combo damage grows", line2: "Combo bonus +1", text: "A broken fang from the void gate, eager for finishing blows.", apply() { relicBonuses.crit += 6; relicBonuses.combo += 1; } }
+];
+
+const biomeThemes = [
+  { id: "crypt", label: "Crypt Ruins", flavor: "Cold stone and old bones press in around the duel." },
+  { id: "swamp", label: "Rotfen Marsh", flavor: "Wet air and green mist roll across the battlefield." },
+  { id: "ember", label: "Ember Hollow", flavor: "A furnace glow leaks across cracked ground and ash." },
+  { id: "void", label: "Void Gate", flavor: "The sky bends dark as the gate hums behind the foe." }
+];
+
+let level = 0;
+let score = 0;
+let currentAnswer = null;
+let currentQuestionData = null;
+let questionMisses = 0;
+let mathDifficulty = "normal";
+let gameDifficulty = "normal";
+let currentSpellId = "spark";
+let spellLevels = { spark: 1 };
+let rewardChoices = [];
+let deathChoices = [];
+let milestoneChoices = [];
+let relicChoices = [];
+let ownedRelics = [];
+let enemyIndex = 0;
+let potionBonuses = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0 };
+let relicBonuses = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0, barrier: 0, burnBoost: 0, bossWard: 0, combo: 0, crit: 0, cleanse: false };
+let deathBlessings = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0, deaths: 0 };
+let battleCount = 1;
+let enemyTurnCount = 0;
+let playerBarrier = 0;
+let enemyWeaken = 0;
+let playerStatus = { burn: 0, curse: 0, freeze: 0 };
+let enemyStatus = { burn: 0, chill: 0 };
+let currentStance = "burst";
+let comboStreak = 0;
+let currentTwist = null;
+let currentRuneTrial = null;
+let selectedRuneChoice = null;
+let nextEnemyMove = null;
+let tutorialStep = 0;
+let turnLocked = false;
+let devShortcutPresses = [];
+let devShortcutUnlocked = false;
+let phaseBannerTimer = null;
+let attackBannerTimer = null;
+let audioContext = null;
+let gameLogEntries = ["The duel is ready."];
+let gameLogPage = 0;
+
+let basePlayerMaxHP = 180;
+let playerHP = 180;
+let maxPlayerHP = 180;
+
+let enemyHP = 150;
+let maxEnemyHP = 150;
+let enemyAttack = 10;
+let currentEnemy = enemyRoster[0];
+
+const tutorialSteps = [
+  {
+    title: "Start A Turn",
+    body: "Pick a math level with the `1-5` buttons, then answer the problem in the middle.",
+    points: [
+      "Higher levels give harder math and stronger attacks.",
+      "Use `Card Details` if you want to inspect the current spell.",
+      "Press `Cast Spell` after you type your answer."
+    ]
+  },
+  {
+    title: "Read The Fight",
+    body: "Watch the enemy intent and choose the stance that fits the moment.",
+    points: [
+      "`Burst` hits harder but wrong answers hurt more.",
+      "`Guard` is safer and builds barrier.",
+      "`Siphon` gives better recovery on clean hits."
+    ]
+  },
+  {
+    title: "Win And Grow",
+    body: "Correct answers damage the enemy. Wrong answers reflect damage back to you. After wins, your run gets stronger.",
+    points: [
+      "Every 3 correct hits in a row triggers a combo surge.",
+      "Wins can give upgraded cards, potions, relics, or milestone boons.",
+      "If you lose, you still choose a blessing for the next run."
+    ]
+  }
+];
+
+function notifyEmbedResult(result) {
+  if (!embedMode || window.parent === window) return;
+  window.parent.postMessage({
+    type: "enzo4-battle-result",
+    result,
+    enemyName: currentEnemy.name,
+    playerHP,
+    enemyHP,
+    score
+  }, "*");
+}
+
+function renderTutorialStep() {
+  const step = tutorialSteps[tutorialStep];
+  document.getElementById("tutorialStepLabel").innerText = `Step ${tutorialStep + 1} of ${tutorialSteps.length}`;
+  document.getElementById("tutorialTitle").innerText = step.title;
+  document.getElementById("tutorialBody").innerText = step.body;
+  document.getElementById("tutorialPoints").innerHTML = step.points.map((point) => `<li>${point}</li>`).join("");
+  document.getElementById("tutorialNext").innerText = tutorialStep === tutorialSteps.length - 1 ? "Start" : "Next";
+}
+
+function closeTutorial(remember = false) {
+  document.getElementById("tutorialOverlay").classList.remove("show");
+  if (remember && !embedMode) {
+    localStorage.setItem("enzo4-tutorial-seen", "1");
+  }
+}
+
+function toggleStats(type) {
+  const wrap = document.getElementById(`${type}StatsWrap`);
+  if (!wrap) return;
+  wrap.classList.toggle("open");
+}
+
+function openTutorial(forceStart = false) {
+  tutorialStep = 0;
+  renderTutorialStep();
+  document.getElementById("tutorialOverlay").classList.add("show");
+  if (forceStart && !embedMode) {
+    localStorage.removeItem("enzo4-tutorial-seen");
+  }
+}
+
+function nextTutorialStep() {
+  if (tutorialStep >= tutorialSteps.length - 1) {
+    closeTutorial(true);
+    return;
+  }
+
+  tutorialStep += 1;
+  renderTutorialStep();
+}
+
+function chooseLevel(lvl) {
+  level = lvl;
+  questionMisses = 0;
+  document.getElementById("level").innerText = lvl;
+  setStatus(`Level ${lvl} selected. A random playable card will be drawn for each cast.`);
+  generateQuestion();
+}
+
+function getMathProfile() {
+  if (mathDifficulty === "easy") {
+    return {
+      label: "Easy",
+      add: { a: [1, 7], b: [1, 6] },
+      subtract: { a: [6, 14], b: [1, 6] },
+      multiply: { a: [2, 8], b: [2, 6] },
+      divide: { answer: [2, 6], b: [2, 6] },
+      order: { a: [2, 6], b: [2, 5], c: [1, 6] }
+    };
+  }
+
+  if (mathDifficulty === "hard") {
+    return {
+      label: "Hard",
+      add: { a: [4, 18], b: [3, 16] },
+      subtract: { a: [14, 35], b: [4, 18] },
+      multiply: { a: [4, 14], b: [3, 14] },
+      divide: { answer: [3, 12], b: [3, 12] },
+      order: { a: [3, 12], b: [3, 12], c: [3, 14] }
+    };
+  }
+
+  return {
+    label: "Normal",
+    add: { a: [1, 10], b: [1, 10] },
+    subtract: { a: [5, 20], b: [1, 10] },
+    multiply: { a: [2, 12], b: [2, 12] },
+    divide: { answer: [2, 10], b: [2, 10] },
+    order: { a: [2, 10], b: [2, 10], c: [1, 10] }
+  };
+}
+
+function updateMathDifficultyButtons() {
+  ["easy", "normal", "hard"].forEach((mode) => {
+    const button = document.getElementById(`math-${mode}`);
+    if (!button) return;
+    button.classList.toggle("selected-toggle", mode === mathDifficulty);
+  });
+
+  const modeLabel = document.getElementById("mathMode");
+  if (modeLabel) modeLabel.innerText = getMathProfile().label;
+}
+
+function getGameProfile() {
+  if (gameDifficulty === "easy") {
+    return { label: "Easy", enemyHpScale: 0.84, enemyAttackScale: 0.98, protection: 1.12 };
+  }
+  if (gameDifficulty === "hard") {
+    return { label: "Hard", enemyHpScale: 1.2, enemyAttackScale: 1.32, protection: 0.9 };
+  }
+  return { label: "Normal", enemyHpScale: 1, enemyAttackScale: 1.14, protection: 1 };
+}
+
+function updateGameDifficultyButtons() {
+  ["easy", "normal", "hard"].forEach((mode) => {
+    const button = document.getElementById(`game-${mode}`);
+    if (!button) return;
+    button.classList.toggle("selected-toggle", mode === gameDifficulty);
+  });
+
+  const modeLabel = document.getElementById("gameMode");
+  if (modeLabel) modeLabel.innerText = getGameProfile().label;
+}
+
+function chooseMathDifficulty(mode) {
+  mathDifficulty = mode;
+  updateMathDifficultyButtons();
+
+  if (level) {
+    setStatus(`${getMathProfile().label} math selected. Your next question has been refreshed.`);
+    generateQuestion();
+  } else {
+    setStatus(`${getMathProfile().label} math selected. Pick a level to begin the duel.`);
+  }
+}
+
+function chooseGameDifficulty(mode) {
+  gameDifficulty = mode;
+  updateGameDifficultyButtons();
+
+  if (level) {
+    loadNextEnemy();
+    generateQuestion();
+    setStatus(`${getGameProfile().label} game difficulty selected. Enemy scaling has been refreshed.`);
+  } else {
+    setStatus(`${getGameProfile().label} game difficulty selected. Start the duel when ready.`);
+  }
+}
+
+function getSpellById(id) {
+  return spellPool.find((spell) => spell.id === id);
+}
+
+function getCurrentSpell() {
+  return getSpellById(currentSpellId) || spellPool[0];
+}
+
+function getPlayableSpellIds() {
+  const owned = getOwnedSpellIds();
+  if (!level) return owned;
+  const playable = owned.filter((id) => getScaledSpellStats(getSpellById(id)).minLevel <= level);
+  return playable.length > 0 ? playable : owned;
+}
+
+function drawCombatSpell() {
+  const pool = getPlayableSpellIds();
+  if (pool.length === 0) return;
+  currentSpellId = pool[rand(0, pool.length - 1)];
+}
+
+function getOwnedSpellIds() {
+  return Object.keys(spellLevels);
+}
+
+function getSpellLevel(id) {
+  return spellLevels[id] || 0;
+}
+
+function getSpellEvolution(spell) {
+  const level = getSpellLevel(spell.id);
+  if (level >= 5) {
+    return {
+      title: `Ascended ${spell.name}`,
+      text: `${spell.text} Its fully awakened form now carries a much heavier battlefield signature.`,
+      power: 2,
+      ward: 1,
+      focus: 1,
+      crit: 3,
+      lifesteal: 2,
+      baseDamage: 3,
+      vitality: 5
+    };
+  }
+
+  if (level >= 3) {
+    return {
+      title: `Awakened ${spell.name}`,
+      text: `${spell.text} The card has evolved and its magic now flows with a deeper edge.`,
+      power: 1,
+      ward: 0,
+      focus: 1,
+      crit: 1,
+      lifesteal: 1,
+      baseDamage: 2,
+      vitality: 2
+    };
+  }
+
+  return null;
+}
+
+function getScaledSpellStats(spell) {
+  const spellLevel = Math.max(1, getSpellLevel(spell.id));
+  const upgradeBonus = spellLevel - 1;
+  const evolution = getSpellEvolution(spell);
+
+  return {
+    ...spell,
+    name: evolution ? evolution.title : spell.name,
+    text: evolution ? evolution.text : spell.text,
+    spellLevel,
+    evolutionTier: evolution ? (spellLevel >= 5 ? 2 : 1) : 0,
+    baseDamage: spell.baseDamage + upgradeBonus * 2 + (evolution?.baseDamage || 0),
+    crit: spell.crit + upgradeBonus + (evolution?.crit || 0) + relicBonuses.crit,
+    power: spell.power + upgradeBonus + (evolution?.power || 0),
+    ward: spell.ward + Math.floor(upgradeBonus / 2) + (evolution?.ward || 0),
+    focus: spell.focus + Math.floor(upgradeBonus / 2) + (evolution?.focus || 0),
+    vitality: spell.vitality + upgradeBonus * 3 + (evolution?.vitality || 0),
+    lifesteal: spell.lifesteal + Math.floor(upgradeBonus / 2) + (evolution?.lifesteal || 0)
+  };
+}
+
+function getSharedSpellStats(spell) {
+  return {
+    health: spell.vitality,
+    attack: spell.baseDamage + spell.power,
+    armor: spell.ward,
+    crit: spell.crit,
+    heal: spell.lifesteal,
+    fury: 1,
+    thorns: 0
+  };
+}
+
+function getPlayerStats() {
+  const stats = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0 };
+
+  getOwnedSpellIds().forEach((id) => {
+    const spell = getScaledSpellStats(getSpellById(id));
+    stats.power += spell.power;
+    stats.ward += spell.ward;
+    stats.focus += spell.focus;
+    stats.vitality += spell.vitality;
+    stats.lifesteal += spell.lifesteal;
+  });
+
+  stats.power += potionBonuses.power;
+  stats.ward += potionBonuses.ward;
+  stats.focus += potionBonuses.focus;
+  stats.vitality += potionBonuses.vitality;
+  stats.lifesteal += potionBonuses.lifesteal;
+
+  stats.power += deathBlessings.power;
+  stats.ward += deathBlessings.ward;
+  stats.focus += deathBlessings.focus;
+  stats.vitality += deathBlessings.vitality;
+  stats.lifesteal += deathBlessings.lifesteal;
+
+  stats.power += relicBonuses.power;
+  stats.ward += relicBonuses.ward;
+  stats.focus += relicBonuses.focus;
+  stats.vitality += relicBonuses.vitality;
+  stats.lifesteal += relicBonuses.lifesteal;
+
+  return stats;
+}
+
+function getSharedPlayerStats() {
+  const stats = getPlayerStats();
+  const spell = getScaledSpellStats(getCurrentSpell());
+  return {
+    health: `${playerHP}/${maxPlayerHP}`,
+    attack: stats.power + spell.baseDamage,
+    armor: stats.ward + playerBarrier,
+    crit: spell.crit,
+    heal: stats.lifesteal,
+    fury: 1,
+    thorns: 0
+  };
+}
+
+function getSharedEnemyStats() {
+  const enemyKey = currentEnemy?.baseName || currentEnemy?.name || "";
+  return {
+    health: `${enemyHP}/${maxEnemyHP}`,
+    attack: enemyAttack,
+    armor: currentEnemy?.armor || 0,
+    crit: (currentEnemy?.fury || 0) * 4 + Math.max(0, (nextEnemyMove?.swing || 1) - 1) * 2,
+    heal: ["Swamp Witch", "Blood Archivist"].includes(enemyKey) ? (currentEnemy?.phase || 1) : 0,
+    fury: 1,
+    thorns: currentEnemy?.thorns || 0
+  };
+}
+
+function formatSharedStatsInline(stats, options = {}) {
+  const valuePrefix = options.valuePrefix || "";
+  const critSuffix = options.critSuffix || "";
+  const recoverySuffix = options.recoverySuffix || options.healSuffix || "";
+  return [
+    `Health ${valuePrefix}${stats.health}`,
+    `Attack ${valuePrefix}${stats.attack}`,
+    `Armor ${valuePrefix}${stats.armor}`,
+    `Crit ${valuePrefix}${stats.crit}${critSuffix}`,
+    `Recovery ${valuePrefix}${stats.heal}${recoverySuffix}`,
+    `Speed ${valuePrefix}${stats.fury}`,
+    `Thorns ${valuePrefix}${stats.thorns || 0}`
+  ].join(" | ");
+}
+
+function getBattleCardText(text) {
+  if (!text) return "";
+  const parts = text.split(".");
+  return parts[0].trim() + (parts[0] ? "." : "");
+}
+
+function recalculatePlayerTotals(preserveRatio = true) {
+  const oldMax = maxPlayerHP;
+  const ratio = oldMax > 0 ? playerHP / oldMax : 1;
+  const stats = getPlayerStats();
+  maxPlayerHP = basePlayerMaxHP + stats.vitality;
+  playerHP = preserveRatio ? Math.round(maxPlayerHP * ratio) : Math.min(playerHP, maxPlayerHP);
+  if (playerHP > maxPlayerHP) playerHP = maxPlayerHP;
+}
+
+function setCombatFeed(message) {
+  const feed = document.getElementById("combatFeed");
+  if (feed) {
+    feed.innerText = message;
+  }
+  pushGameLog(message);
+}
+
+function renderGameLog() {
+  const log = document.getElementById("gameLog");
+  if (!log) return;
+  const perPage = 3;
+  const maxPage = Math.max(0, Math.ceil(gameLogEntries.length / perPage) - 1);
+  gameLogPage = Math.max(0, Math.min(gameLogPage, maxPage));
+  const start = gameLogPage * perPage;
+  const visible = gameLogEntries.slice(start, start + perPage);
+  log.innerHTML = visible.map((entry) => `<div class="game-log-entry">${entry}</div>`).join("");
+}
+
+function pushGameLog(message) {
+  if (!message) return;
+  gameLogEntries = [message, ...gameLogEntries.filter((entry) => entry !== message)].slice(0, 5);
+  gameLogPage = 0;
+  renderGameLog();
+}
+
+function stepGameLog(direction) {
+  const perPage = 3;
+  const maxPage = Math.max(0, Math.ceil(gameLogEntries.length / perPage) - 1);
+  gameLogPage = Math.max(0, Math.min(maxPage, gameLogPage + direction));
+  renderGameLog();
+}
+
+function getAudioContext() {
+  if (audioContext) return audioContext;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  audioContext = new Ctx();
+  return audioContext;
+}
+
+function playRetroTone(type) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {});
+  }
+
+  const config = {
+    hit: { freq: 240, end: 180, duration: 0.08, gain: 0.035, wave: "square" },
+    heal: { freq: 420, end: 560, duration: 0.1, gain: 0.028, wave: "triangle" },
+    miss: { freq: 170, end: 110, duration: 0.12, gain: 0.035, wave: "sawtooth" },
+    phase: { freq: 260, end: 420, duration: 0.16, gain: 0.04, wave: "square" },
+    boss: { freq: 140, end: 260, duration: 0.22, gain: 0.05, wave: "square" }
+  }[type];
+
+  if (!config) return;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const now = ctx.currentTime;
+  osc.type = config.wave;
+  osc.frequency.setValueAtTime(config.freq, now);
+  osc.frequency.linearRampToValueAtTime(config.end, now + config.duration);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(config.gain, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + config.duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + config.duration + 0.02);
+}
+
+function showPhaseBanner(title, text, tone = "phase") {
+  const banner = document.getElementById("phaseBanner");
+  if (!banner) return;
+  document.getElementById("phaseBannerTitle").innerText = title;
+  document.getElementById("phaseBannerText").innerText = text;
+  banner.classList.add("show");
+  clearTimeout(phaseBannerTimer);
+  phaseBannerTimer = setTimeout(() => banner.classList.remove("show"), 2400);
+  playRetroTone(tone);
+}
+
+function pulseBossWarning() {
+  const panel = document.getElementById("enemyPanel");
+  if (!panel) return;
+  panel.classList.remove("boss-warning");
+  void panel.offsetWidth;
+  panel.classList.add("boss-warning");
+  setTimeout(() => panel.classList.remove("boss-warning"), 760);
+}
+
+function showAttackBanner(title, text) {
+  const banner = document.getElementById("attackBanner");
+  if (!banner) return;
+  document.getElementById("attackBannerTitle").innerText = title;
+  document.getElementById("attackBannerText").innerText = text;
+  banner.classList.add("show");
+  clearTimeout(attackBannerTimer);
+  attackBannerTimer = setTimeout(() => banner.classList.remove("show"), 700);
+}
+
+function getRelicIcon(relic) {
+  return {
+    "relic-ember": "Ash",
+    "relic-mirror": "Ward",
+    "relic-lantern": "Moon",
+    "relic-root": "Root",
+    "relic-rift": "Rift"
+  }[relic.id] || "Relic";
+}
+
+function renderRelics() {
+  const row = document.getElementById("relicRow");
+  if (!row) return;
+  row.innerHTML = "";
+
+  if (ownedRelics.length === 0) {
+    row.innerHTML = '<div class="relic-chip"><strong>None</strong><span>No relics yet</span></div>';
+    return;
+  }
+
+  ownedRelics.forEach((relic) => {
+    const node = document.createElement("div");
+    node.className = "relic-chip";
+    node.innerHTML = `<strong>${getRelicIcon(relic)}</strong><span>${relic.name}</span>`;
+    row.appendChild(node);
+  });
+}
+
+function openSpellbookPopup() {
+  document.getElementById("spellbookPopup").classList.add("show");
+}
+
+function closeSpellbookPopup() {
+  document.getElementById("spellbookPopup").classList.remove("show");
+}
+
+function openCardPopup(spellId = null) {
+  const spell = getScaledSpellStats(spellId ? getSpellById(spellId) : getCurrentSpell());
+  const shared = getSharedSpellStats(spell);
+  document.getElementById("cardPopupTitle").innerText = spell.name;
+  document.getElementById("cardPopupTag").innerText = `${spell.rarity} Lv.${spell.spellLevel}`;
+  document.getElementById("cardPopupName").innerText = spell.name;
+  document.getElementById("cardPopupText").innerText = spell.text;
+  document.getElementById("cardPopupRules").innerText = formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" });
+  document.getElementById("cardPopupArt").innerHTML = getSpellArtMarkup(spell, "large");
+  document.getElementById("cardPopup").classList.add("show");
+}
+
+function closeCardPopup() {
+  document.getElementById("cardPopup").classList.remove("show");
+}
+
+function togglePauseMenu(forceOpen = null) {
+  const panel = document.getElementById("pausePanel");
+  const button = document.getElementById("pauseToggle");
+  if (!panel || !button) return;
+  const opening = forceOpen === null ? !panel.classList.contains("show") : forceOpen;
+  panel.classList.toggle("show", opening);
+  button.innerText = opening ? "Close Menu" : "Menu";
+}
+
+function toggleSettings() {
+  const panel = document.getElementById("settingsPanel");
+  const button = document.getElementById("settingsToggle");
+  if (!panel || !button) return;
+  const opening = !panel.classList.contains("open");
+  panel.classList.toggle("open", opening);
+  button.innerText = opening ? "Close Settings" : "Open Settings";
+}
+
+function toggleCollection() {
+  const panel = document.getElementById("collectionPanel");
+  const button = document.getElementById("collectionToggle");
+  if (!panel || !button) return;
+  const opening = !panel.classList.contains("open");
+  panel.classList.toggle("open", opening);
+  button.innerText = opening ? "Hide Cards & Relics" : "Open Cards & Relics";
+}
+
+function setDevPanelOpen(opening, revealButton = false) {
+  const panel = document.getElementById("devPanel");
+  const button = document.getElementById("devToggle");
+  if (!panel || !button) return;
+  panel.classList.toggle("open", opening);
+  button.hidden = !revealButton && !opening;
+  button.setAttribute("aria-hidden", button.hidden ? "true" : "false");
+  button.innerText = opening ? "Close Dev" : "Open Dev";
+}
+
+function toggleDevPanel() {
+  if (!devShortcutUnlocked) return;
+  const panel = document.getElementById("devPanel");
+  if (!panel) return;
+  const opening = !panel.classList.contains("open");
+  setDevPanelOpen(opening, opening);
+  if (!opening) {
+    devShortcutUnlocked = false;
+  }
+}
+
+function handleDevShortcut(event) {
+  if (embedMode || event.key !== "Backspace" || event.repeat) {
+    return;
+  }
+
+  const target = event.target;
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target?.isContentEditable
+  ) {
+    return;
+  }
+
+  const now = Date.now();
+  devShortcutPresses = devShortcutPresses.filter((timestamp) => now - timestamp <= 1400);
+  devShortcutPresses.push(now);
+
+  if (devShortcutPresses.length < 5) {
+    return;
+  }
+
+  devShortcutPresses = [];
+  devShortcutUnlocked = true;
+  setDevPanelOpen(true, true);
+  setStatus("Dev panel unlocked.");
+  setCombatFeed("Hidden dev shortcut accepted.");
+}
+
+function closeProgressPanels() {
+  ["rewardPanel", "relicPanel", "milestonePanel", "deathPanel"].forEach((id) => {
+    const panel = document.getElementById(id);
+    if (panel) {
+      panel.classList.remove("show");
+    }
+  });
+}
+
+function devAdvanceBattles(amount) {
+  if (embedMode) return;
+  closeProgressPanels();
+  battleCount = Math.max(1, battleCount + amount);
+  loadNextEnemy();
+  generateQuestion();
+  updateHealthBars();
+  setStatus(`Dev skip: advanced ${amount} round${amount === 1 ? "" : "s"} to battle ${battleCount}.`);
+  setCombatFeed("Dev panel advanced the run.");
+}
+
+function devJumpToBoss() {
+  if (embedMode) return;
+  closeProgressPanels();
+  if (battleCount % 5 !== 0) {
+    battleCount += 5 - (battleCount % 5);
+  }
+  loadNextEnemy();
+  generateQuestion();
+  updateHealthBars();
+  setStatus(`Dev jump: battle ${battleCount} is now loaded.`);
+  setCombatFeed("Boss jump engaged from the dev panel.");
+}
+
+function devHealFull() {
+  playerHP = maxPlayerHP;
+  updateHealthBars();
+  setStatus("Dev heal: HP restored to full.");
+  setCombatFeed("Your testing run is back at full strength.");
+}
+
+function devRerollEnemy() {
+  if (embedMode) return;
+  closeProgressPanels();
+  battleCount += 1;
+  loadNextEnemy();
+  generateQuestion();
+  updateHealthBars();
+  setStatus(`Dev reroll: new enemy loaded for battle ${battleCount}.`);
+  setCombatFeed("Enemy lineup rerolled from the dev panel.");
+}
+
+function pulsePanel(id, className) {
+  const panel = document.getElementById(id);
+  if (!panel) return;
+  panel.classList.remove(className);
+  void panel.offsetWidth;
+  panel.classList.add(className);
+  setTimeout(() => panel.classList.remove(className), 420);
+}
+
+function animateElementClass(selector, className, duration = 260) {
+  const element = typeof selector === "string" ? document.querySelector(selector) : selector;
+  if (!element) return;
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+  setTimeout(() => element.classList.remove(className), duration);
+}
+
+function showFloatingText(layerId, text, type = "damage") {
+  const layer = document.getElementById(layerId);
+  if (!layer) return;
+  const node = document.createElement("div");
+  node.className = `floating-text ${type}`;
+  node.textContent = text;
+  node.style.left = `${rand(38, 62)}%`;
+  node.style.top = type === "phase" ? "30%" : `${rand(42, 62)}%`;
+  layer.appendChild(node);
+  setTimeout(() => node.remove(), 1400);
+}
+
+function getEnemyPhaseLabel(enemy) {
+  return enemy.phase >= 3 ? "Final Phase" : enemy.phase === 2 ? "Phase Two" : "Opening Phase";
+}
+
+function maybeAdvanceEnemyPhase() {
+  if (!currentEnemy || currentEnemy.phase >= 3) return false;
+  const hpRatio = enemyHP / Math.max(1, maxEnemyHP);
+  let changed = false;
+  let bannerText = "";
+
+  if (currentEnemy.phase === 1 && hpRatio <= 0.6) {
+    currentEnemy.phase = 2;
+    currentEnemy.attack += 2;
+    currentEnemy.fury += 1;
+    currentEnemy.bonusText = `${currentEnemy.baseBonusText} Phase two: ${currentEnemy.phaseTwoText}`;
+    changed = true;
+    bannerText = `${currentEnemy.name} entered phase two. ${currentEnemy.phaseTwoText}`;
+  } else if (currentEnemy.phase === 2 && hpRatio <= 0.28) {
+    currentEnemy.phase = 3;
+    currentEnemy.attack += 3;
+    currentEnemy.armor += 1;
+    currentEnemy.thorns += currentEnemy.name === "Ash Drake" ? 1 : 0;
+    currentEnemy.bonusText = `${currentEnemy.baseBonusText} Final phase: ${currentEnemy.phaseThreeText}`;
+    changed = true;
+    bannerText = `${currentEnemy.name} entered final phase. ${currentEnemy.phaseThreeText}`;
+  }
+
+  if (changed) {
+    animateElementClass(".enemy-stage", "phase-flash", 420);
+    showFloatingText("enemyFloaters", getEnemyPhaseLabel(currentEnemy), "phase");
+    showPhaseBanner(getEnemyPhaseLabel(currentEnemy), bannerText, currentEnemy.isBoss ? "boss" : "phase");
+    setCombatFeed(`${currentEnemy.name} shifts into ${getEnemyPhaseLabel(currentEnemy).toLowerCase()}.`);
+    nextEnemyMove = planEnemyMove();
+    document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+    renderEnemyStats();
+  }
+
+  return changed;
+}
+
+function getEarlyBattleProtection() {
+  const base = battleCount <= 2 ? 0.5 : battleCount <= 4 ? 0.75 : 1;
+  return base * getGameProfile().protection;
+}
+
+function getCurrentBiome() {
+  if (currentEnemy.isBoss) return biomeThemes[3];
+  return biomeThemes[Math.floor((battleCount - 1) / 3) % biomeThemes.length];
+}
+
+function updateBiomeTheme() {
+  const screen = document.querySelector(".screen");
+  if (!screen) return;
+  screen.classList.remove("biome-crypt", "biome-swamp", "biome-ember", "biome-void");
+  const biome = getCurrentBiome();
+  screen.classList.add(`biome-${biome.id}`);
+}
+
+function rollQuestionTwist() {
+  const pool = [
+    { id: "steady", label: "Ritual Twist: Steady Sigil | Barrier +4 on a clean cast" },
+    { id: "greedy", label: "Ritual Twist: Greedy Flame | +5 damage, but harsher reflect" },
+    { id: "mercy", label: "Ritual Twist: Mercy Veil | Wrong answers hurt less" },
+    { id: "surge", label: "Ritual Twist: Surge Mark | First-try casts gain +6 crit" }
+  ];
+  currentTwist = pool[rand(0, pool.length - 1)];
+  const twistEl = document.getElementById("questionTwist");
+  if (twistEl) twistEl.innerText = currentTwist.label;
+}
+
+function buildRuneTrial() {
+  currentRuneTrial = null;
+  selectedRuneChoice = null;
+}
+
+function renderRuneTrial() {
+  return;
+}
+
+function selectRuneChoice(choiceId) {
+  return;
+}
+
+function evaluateRuneTrial() {
+  return { chosen: false, success: false, damageBonus: 0, critBonus: 0, barrierGain: 0, healFlat: 0, weakenGain: 0, comboBonus: 0, text: "" };
+}
+
+function getStanceConfig() {
+  return {
+    burst: {
+      name: "Burst",
+      damageBonus: 5,
+      critBonus: 5,
+      reflectScale: 1.15,
+      barrierGain: 0,
+      wardBonus: 0,
+      extraLifesteal: 0
+    },
+    guard: {
+      name: "Guard",
+      damageBonus: -2,
+      critBonus: 0,
+      reflectScale: 0.72,
+      barrierGain: 5,
+      wardBonus: 2,
+      extraLifesteal: 0
+    },
+    siphon: {
+      name: "Siphon",
+      damageBonus: -1,
+      critBonus: 2,
+      reflectScale: 0.82,
+      barrierGain: 0,
+      wardBonus: 0,
+      extraLifesteal: 8
+    }
+  }[currentStance];
+}
+
+function updateStanceButtons() {
+  ["burst", "guard", "siphon"].forEach((stance) => {
+    const button = document.getElementById(`stance-${stance}`);
+    if (button) {
+      button.classList.toggle("selected", currentStance === stance);
+    }
+  });
+
+  const readout = document.getElementById("stanceReadout");
+  if (readout) {
+    const comboHint = comboStreak > 0 && comboStreak % 3 === 0 ? " | Surge Ready" : "";
+    readout.innerText = `Ritual Stance: ${getStanceConfig().name} | Combo ${comboStreak}${comboHint}`;
+  }
+}
+
+function selectStance(stance) {
+  currentStance = stance;
+  updateStanceButtons();
+  updateSelectedSpell();
+  setStatus(`${getCurrentSpell().name} shifts into ${getStanceConfig().name} stance.`);
+}
+
+function getSpellEffectText(spell) {
+  const effects = {
+    spark: "Quick hit. Best on low levels. Gives a little ward.",
+    ember: "Simple fire hit. Gains extra damage on stronger casts.",
+    moss: "Low damage. Gives healing and barrier.",
+    frost: "Deals damage and weakens the next enemy hit.",
+    storm: "High crit spell. Best when you want burst damage.",
+    prism: "Balanced spell with steady healing.",
+    nova: "Breaks armor and hits hard.",
+    aegis: "Builds a heavy barrier for safer turns.",
+    void: "Deals damage and steals life back.",
+    meteor: "Hits hardest when the enemy still has high HP.",
+    oracle: "Strong crit and healing support."
+  };
+  return effects[spell.id] || spell.text;
+}
+
+function getSpellArtMarkup(spell, size = "small") {
+  const art = {
+    spark: {
+      bg: "radial-gradient(circle at 50% 30%, rgba(255,223,128,0.95), rgba(255,150,52,0.55) 28%, rgba(47,19,9,0.9) 78%)",
+      core: "width:78px;height:78px;border-radius:50%;background:radial-gradient(circle, #fff6b5 0 22%, #ffb347 22% 48%, #6e2d0c 48% 100%);box-shadow:0 0 18px rgba(255,177,73,0.55);",
+      ring: "left:50%;top:50%;width:116px;height:116px;border:4px solid rgba(255,191,92,0.7);transform:translate(-50%,-50%) rotate(12deg);",
+      detail: "left:50%;top:50%;width:138px;height:18px;background:linear-gradient(90deg, transparent, rgba(255,244,196,0.95), transparent);transform:translate(-50%,-50%) rotate(-22deg);",
+      accent: "right:18px;top:18px;width:38px;height:38px;background:radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,198,85,0));"
+    },
+    ember: {
+      bg: "radial-gradient(circle at 52% 24%, rgba(255,178,88,0.8), rgba(146,44,18,0.48) 30%, rgba(28,10,7,0.95) 80%)",
+      core: "width:96px;height:128px;clip-path:polygon(50% 0, 76% 20%, 92% 48%, 76% 86%, 50% 100%, 24% 86%, 8% 48%, 24% 20%);background:linear-gradient(180deg, #fff0ab 0, #ff9736 42%, #992813 88%);box-shadow:0 0 22px rgba(255,124,52,0.5);",
+      ring: "left:50%;top:54%;width:140px;height:140px;border:3px solid rgba(255,129,64,0.42);transform:translate(-50%,-50%);",
+      detail: "left:50%;top:63%;width:150px;height:50px;background:radial-gradient(ellipse, rgba(255,90,29,0.4), transparent 70%);transform:translate(-50%,-50%);",
+      accent: "left:22px;top:24px;width:20px;height:20px;background:#ffd37a;box-shadow:44px 18px 0 #ff9f45,88px 4px 0 #ffdb8c,116px 34px 0 #ff8b3a;"
+    },
+    moss: {
+      bg: "radial-gradient(circle at 50% 20%, rgba(149,191,98,0.75), rgba(40,70,33,0.55) 30%, rgba(15,17,14,0.95) 78%)",
+      core: "width:116px;height:116px;border-radius:46% 54% 38% 62% / 42% 42% 58% 58%;background:radial-gradient(circle at 48% 34%, #b5df80 0 20%, #567b35 26% 58%, #26311e 62% 100%);",
+      ring: "left:50%;top:50%;width:134px;height:134px;border:4px solid rgba(130,184,94,0.48);border-radius:50%;transform:translate(-50%,-50%);",
+      detail: "left:50%;top:50%;width:150px;height:110px;background:conic-gradient(from 120deg, transparent 0 18%, rgba(155,197,96,0.8) 18% 27%, transparent 27% 43%, rgba(105,155,72,0.8) 43% 52%, transparent 52% 100%);transform:translate(-50%,-50%);opacity:0.9;",
+      accent: "left:28px;bottom:22px;width:108px;height:40px;background:radial-gradient(circle, rgba(115,155,86,0.9), rgba(115,155,86,0) 72%);"
+    },
+    frost: {
+      bg: "radial-gradient(circle at 50% 18%, rgba(176,225,255,0.85), rgba(58,97,138,0.45) 28%, rgba(9,18,31,0.94) 78%)",
+      core: "width:96px;height:96px;background:conic-gradient(from 0deg, #d8f8ff, #7dc8f1, #d8f8ff);clip-path:polygon(50% 0, 60% 30%, 100% 50%, 60% 70%, 50% 100%, 40% 70%, 0 50%, 40% 30%);box-shadow:0 0 18px rgba(145,215,255,0.45);",
+      ring: "left:50%;top:50%;width:132px;height:132px;border:3px solid rgba(154,226,255,0.45);transform:translate(-50%,-50%) rotate(45deg);",
+      detail: "left:50%;top:50%;width:12px;height:156px;background:linear-gradient(180deg, transparent, rgba(226,252,255,0.95), transparent);transform:translate(-50%,-50%);box-shadow:56px 0 0 rgba(195,240,255,0.65),-56px 0 0 rgba(195,240,255,0.65),0 0 0 transparent;",
+      accent: "left:18px;top:18px;width:16px;height:16px;background:#e8fcff;box-shadow:38px 20px 0 #bdeaff,112px 10px 0 #a0d7ff;"
+    },
+    storm: {
+      bg: "radial-gradient(circle at 48% 20%, rgba(179,207,255,0.8), rgba(62,61,147,0.45) 26%, rgba(11,11,28,0.96) 78%)",
+      core: "width:78px;height:148px;background:linear-gradient(180deg, #f1f4ff 0, #90a9ff 18%, #cfd6ff 26%, #6f7bf0 46%, #edf3ff 54%, #5e65c7 74%, #27305d 100%);clip-path:polygon(44% 0, 74% 0, 56% 37%, 86% 37%, 24% 100%, 38% 58%, 14% 58%);",
+      ring: "left:50%;top:54%;width:158px;height:106px;border-top:4px solid rgba(164,185,255,0.55);border-bottom:4px solid rgba(164,185,255,0.2);transform:translate(-50%,-50%) skewX(-12deg);",
+      detail: "left:50%;top:42%;width:154px;height:70px;background:radial-gradient(ellipse, rgba(133,149,255,0.38), transparent 68%);transform:translate(-50%,-50%);",
+      accent: "right:22px;top:22px;width:18px;height:18px;background:#f9fcff;box-shadow:-34px 14px 0 #b9cfff,-74px -4px 0 #8ca3ff;"
+    },
+    prism: {
+      bg: "radial-gradient(circle at 50% 18%, rgba(255,227,182,0.8), rgba(99,68,124,0.45) 34%, rgba(10,13,27,0.95) 78%)",
+      core: "width:96px;height:96px;border-radius:50%;background:conic-gradient(#f7f1b4, #90d4ff, #bda0ff, #ff9bb5, #f7f1b4);box-shadow:0 0 20px rgba(213,175,255,0.32);",
+      ring: "left:50%;top:50%;width:138px;height:138px;border:4px solid rgba(222,186,255,0.42);border-radius:50%;transform:translate(-50%,-50%);",
+      detail: "left:50%;top:50%;width:148px;height:148px;background:conic-gradient(from 0deg, rgba(255,255,255,0.08) 0 10%, transparent 10% 20%, rgba(255,255,255,0.08) 20% 30%, transparent 30% 40%, rgba(255,255,255,0.08) 40% 50%, transparent 50% 60%, rgba(255,255,255,0.08) 60% 70%, transparent 70% 80%, rgba(255,255,255,0.08) 80% 90%, transparent 90% 100%);transform:translate(-50%,-50%);",
+      accent: "left:22px;bottom:18px;width:22px;height:22px;background:#fff0b9;box-shadow:42px -12px 0 #9dd8ff,94px -4px 0 #d7a9ff,122px 8px 0 #ffadc8;"
+    },
+    nova: {
+      bg: "radial-gradient(circle at 50% 22%, rgba(255,243,160,0.9), rgba(250,133,54,0.55) 26%, rgba(40,12,16,0.95) 82%)",
+      core: "width:120px;height:120px;border-radius:50%;background:radial-gradient(circle, #fffbd2 0 18%, #ffd052 18% 34%, #ff8241 34% 56%, #6f2315 56% 100%);box-shadow:0 0 26px rgba(255,156,75,0.56);",
+      ring: "left:50%;top:50%;width:160px;height:160px;border:5px solid rgba(255,214,110,0.38);border-radius:50%;transform:translate(-50%,-50%);",
+      detail: "left:50%;top:50%;width:182px;height:182px;background:conic-gradient(from 0deg, rgba(255,214,98,0.7) 0 9%, transparent 9% 18%, rgba(255,129,78,0.72) 18% 27%, transparent 27% 36%, rgba(255,221,147,0.7) 36% 45%, transparent 45% 54%, rgba(255,129,78,0.72) 54% 63%, transparent 63% 72%, rgba(255,214,98,0.7) 72% 81%, transparent 81% 90%, rgba(255,129,78,0.72) 90% 100%);transform:translate(-50%,-50%);",
+      accent: "left:18px;top:20px;width:18px;height:18px;background:#fff9ca;box-shadow:102px 10px 0 #ffce68,130px 50px 0 #ff8e49,40px 94px 0 #ffc861;"
+    },
+    aegis: {
+      bg: "radial-gradient(circle at 50% 18%, rgba(241,216,150,0.65), rgba(98,78,43,0.4) 26%, rgba(16,14,12,0.95) 78%)",
+      core: "width:104px;height:130px;background:linear-gradient(180deg, #f7e1a3 0, #b89443 25%, #77551a 58%, #3d2710 100%);clip-path:polygon(50% 0, 88% 18%, 88% 62%, 50% 100%, 12% 62%, 12% 18%);box-shadow:0 0 18px rgba(230,194,116,0.25);",
+      ring: "left:50%;top:56%;width:146px;height:166px;border:4px solid rgba(214,181,111,0.4);clip-path:polygon(50% 0, 88% 18%, 88% 62%, 50% 100%, 12% 62%, 12% 18%);transform:translate(-50%,-50%);",
+      detail: "left:50%;top:50%;width:18px;height:148px;background:linear-gradient(180deg, transparent, rgba(255,241,194,0.78), transparent);transform:translate(-50%,-50%);box-shadow:0 0 0 transparent,42px 0 0 rgba(173,135,56,0.5),-42px 0 0 rgba(173,135,56,0.5);",
+      accent: "right:18px;bottom:22px;width:46px;height:46px;background:radial-gradient(circle, rgba(255,224,157,0.6), rgba(255,224,157,0));"
+    },
+    void: {
+      bg: "radial-gradient(circle at 50% 18%, rgba(142,104,196,0.65), rgba(34,22,65,0.56) 28%, rgba(4,6,14,0.98) 78%)",
+      core: "width:98px;height:122px;border-radius:46px 46px 36px 36px;background:radial-gradient(circle at 50% 28%, #ffe7a0 0 10%, #9a76ff 10% 23%, #190f32 23% 66%, #05070f 66% 100%);box-shadow:0 0 22px rgba(134,99,255,0.4);",
+      ring: "left:50%;top:52%;width:138px;height:138px;border:3px solid rgba(143,115,235,0.38);border-radius:50%;transform:translate(-50%,-50%);",
+      detail: "left:50%;top:55%;width:148px;height:84px;background:radial-gradient(ellipse, rgba(103,72,183,0.34), transparent 70%);transform:translate(-50%,-50%);",
+      accent: "left:26px;top:28px;width:12px;height:12px;background:#e2d7ff;box-shadow:40px -8px 0 #8e77ff,100px 10px 0 #7258cb,126px 42px 0 #ffe1a0;"
+    },
+    meteor: {
+      bg: "radial-gradient(circle at 50% 16%, rgba(255,226,143,0.7), rgba(134,61,29,0.48) 28%, rgba(18,8,8,0.98) 78%)",
+      core: "width:120px;height:64px;background:linear-gradient(90deg, #4c2b16 0, #c88432 24%, #f5dd9b 42%, #7a3d1c 74%, #28130d 100%);clip-path:polygon(10% 62%, 20% 28%, 42% 0, 60% 0, 86% 24%, 100% 56%, 84% 88%, 58% 100%, 34% 96%, 14% 84%);box-shadow:0 0 18px rgba(244,188,93,0.32);",
+      ring: "left:50%;top:46%;width:172px;height:82px;border:4px solid rgba(240,186,102,0.36);border-radius:50%;transform:translate(-50%,-50%) rotate(-10deg);",
+      detail: "left:50%;top:58%;width:170px;height:120px;background:linear-gradient(180deg, rgba(255,170,94,0.45), transparent 48%);clip-path:polygon(42% 0, 58% 0, 76% 100%, 24% 100%);transform:translate(-50%,-50%);",
+      accent: "right:20px;top:18px;width:26px;height:26px;background:#fff0bc;box-shadow:-48px 14px 0 #db9950,-92px 34px 0 #8b4729;"
+    },
+    oracle: {
+      bg: "radial-gradient(circle at 50% 16%, rgba(196,228,255,0.82), rgba(89,116,154,0.46) 32%, rgba(8,11,20,0.96) 78%)",
+      core: "width:116px;height:116px;border-radius:50%;background:radial-gradient(circle at 50% 50%, #eef8ff 0 14%, #9ad3ff 14% 28%, #29415e 28% 54%, #bcdaf1 54% 62%, #141f33 62% 100%);box-shadow:0 0 20px rgba(156,213,255,0.36);",
+      ring: "left:50%;top:50%;width:154px;height:154px;border:3px solid rgba(175,217,255,0.42);border-radius:50%;transform:translate(-50%,-50%);",
+      detail: "left:50%;top:50%;width:164px;height:164px;background:conic-gradient(from 0deg, transparent 0 8%, rgba(219,238,255,0.72) 8% 12%, transparent 12% 20%, rgba(173,216,255,0.62) 20% 24%, transparent 24% 32%, rgba(219,238,255,0.72) 32% 36%, transparent 36% 44%, rgba(173,216,255,0.62) 44% 48%, transparent 48% 100%);transform:translate(-50%,-50%);",
+      accent: "left:20px;bottom:16px;width:18px;height:18px;background:#f2fbff;box-shadow:46px -10px 0 #c6e6ff,96px -4px 0 #8bc8ff,128px 12px 0 #edf9ff;"
+    }
+  }[spell.id] || {
+    bg: "radial-gradient(circle at 50% 20%, rgba(255,216,133,0.6), rgba(46,19,17,0.4) 26%, rgba(11,10,14,0.95) 78%)",
+    core: "width:90px;height:90px;border-radius:50%;background:radial-gradient(circle, #fff2b3, #734022 70%);",
+    ring: "left:50%;top:50%;width:140px;height:140px;border:3px solid rgba(244,205,126,0.4);transform:translate(-50%,-50%);",
+    detail: "left:50%;top:50%;width:120px;height:120px;background:radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);transform:translate(-50%,-50%);",
+    accent: "right:20px;top:20px;width:18px;height:18px;background:#fff6d1;"
+  };
+
+  return `
+    <div class="spell-art ${size}">
+      <div class="art-bg" style="${art.bg}"></div>
+      <div class="art-ring" style="${art.ring}"></div>
+      <div class="art-glow" style="${art.detail}"></div>
+      <div class="art-core" style="${art.core}"></div>
+      <div class="art-accent" style="${art.accent}"></div>
+      <div class="art-caption">${spell.rarity} Spell</div>
+    </div>
+  `;
+}
+
+function calculateDamage(runeResult = null) {
+  const spell = getScaledSpellStats(getCurrentSpell());
+  const stats = getPlayerStats();
+  const stance = getStanceConfig();
+  const comboBonus = Math.min(comboStreak * 2, 12) + relicBonuses.combo;
+  const base = level * 10 + spell.baseDamage + stats.power + stance.damageBonus + comboBonus;
+  let bonusDamage = 0;
+  let armorPierce = 0;
+  let extraLifesteal = 0;
+  let barrierGain = relicBonuses.barrier;
+  let weakenGain = enemyStatus.chill;
+  let critBonus = relicBonuses.crit + (runeResult?.critBonus || 0);
+
+  if (spell.id === "spark") {
+    bonusDamage += Math.max(1, 5 - level);
+  } else if (spell.id === "ember") {
+    bonusDamage += level >= 3 ? 5 : 2;
+  } else if (spell.id === "moss") {
+    barrierGain += 5 + Math.floor(spell.spellLevel / 2);
+    extraLifesteal += 5;
+  } else if (spell.id === "frost") {
+    weakenGain += 3 + Math.floor(spell.spellLevel / 2);
+  } else if (spell.id === "storm") {
+    critBonus += level >= 3 ? 12 : 5;
+  } else if (spell.id === "prism") {
+    extraLifesteal += 8;
+  } else if (spell.id === "nova") {
+    armorPierce += 2 + Math.floor(level / 2);
+    bonusDamage += level;
+  } else if (spell.id === "aegis") {
+    barrierGain += 9 + spell.spellLevel;
+  } else if (spell.id === "void") {
+    extraLifesteal += 10;
+    critBonus += 4;
+  } else if (spell.id === "meteor") {
+    bonusDamage += Math.round((enemyHP / Math.max(1, maxEnemyHP)) * 8);
+  } else if (spell.id === "oracle") {
+    critBonus += 8;
+    extraLifesteal += 4;
+  }
+
+  if (currentTwist?.id === "greedy") {
+    bonusDamage += 5;
+  } else if (currentTwist?.id === "steady") {
+    barrierGain += 4;
+  } else if (currentTwist?.id === "surge" && questionMisses === 0) {
+    critBonus += 6;
+  }
+
+  barrierGain += stance.barrierGain;
+  extraLifesteal += stance.extraLifesteal;
+  critBonus += stance.critBonus;
+
+  const critChance = spell.crit + stats.focus * 2 + critBonus;
+  const crit = rand(1, 100) <= critChance;
+  const critMultiplier = crit ? 1.5 : 1;
+  const rawDamage = Math.round((base + bonusDamage + (runeResult?.damageBonus || 0)) * critMultiplier);
+  const finalDamage = Math.max(1, rawDamage - Math.max(0, currentEnemy.armor - armorPierce));
+  return {
+    value: finalDamage,
+    crit,
+    extraLifesteal,
+    barrierGain,
+    weakenGain,
+    armorPierce,
+    comboBonus,
+    stanceName: stance.name,
+    reflectScale: stance.reflectScale,
+    wardBonus: stance.wardBonus,
+    runeResult
+  };
+}
+
+function calculateEnemyAttack() {
+  const stats = getPlayerStats();
+  const stance = getStanceConfig();
+  const move = nextEnemyMove || planEnemyMove();
+  let raw = move.damage + rand(0, move.swing);
+  raw += 2;
+  if (enemyTurnCount >= 3) {
+    raw += Math.min(6, Math.floor(enemyTurnCount / 2) + 1);
+  }
+  if (currentEnemy.phase >= 2) {
+    raw += 2;
+  }
+  raw = Math.max(1, raw - enemyWeaken - enemyStatus.chill);
+  let reduced = Math.max(0, raw - stats.ward - stance.wardBonus - playerBarrier);
+  const blocked = raw - reduced;
+  return { damage: reduced, blocked, move };
+}
+
+function getAllowedRarities() {
+  if (battleCount >= 8) return ["Common", "Rare", "Epic", "Legendary"];
+  if (battleCount >= 5) return ["Common", "Rare", "Epic"];
+  if (battleCount >= 2) return ["Common", "Rare"];
+  return ["Common"];
+}
+
+function getEnemyIntentText() {
+  if (nextEnemyMove?.label === "Ambush rush") return "Intent: Ambush rush | Fast opening burst";
+  if (nextEnemyMove?.label === "Iron march") return "Intent: Iron march | Attack and armor up";
+  if (nextEnemyMove?.label === "Bog omen") return "Intent: Bog omen | Curse incoming";
+  if (nextEnemyMove?.label === "Cinder wake") return "Intent: Cinder wake | Thorns rising";
+  if (nextEnemyMove?.label === "Ink bind") return "Intent: Ink bind | Curse and strip weaken";
+  if (nextEnemyMove?.label === "Rooted stance") return "Intent: Rooted stance | Armor and thorns up";
+  if (nextEnemyMove?.label === "Boss Cataclysm") return "Intent: Boss Cataclysm | Warning: huge hit and status pressure";
+  if (nextEnemyMove?.label === "Boss Guardbreak") return "Intent: Boss Guardbreak | Warning: barrier break incoming";
+  if (nextEnemyMove) return `Intent: ${nextEnemyMove.label} | ${currentEnemy.isBoss ? "Boss" : getEnemyPhaseLabel(currentEnemy)}`;
+  if (currentEnemy.phaseText) return `Intent: ${currentEnemy.phaseText}`;
+  if (currentEnemy.thorns >= 2) return "Intent: Thorned retaliation";
+  if (currentEnemy.fury >= 2) return "Intent: Wild burst";
+  if (currentEnemy.armor >= 3) return "Intent: Heavy guard";
+  return "Intent: Pressing attack";
+}
+
+function updateTurnOrder(text = "Your Turn -> Solve and cast") {
+  const node = document.getElementById("turnOrder");
+  if (node) node.innerText = text;
+}
+
+function setTurnInteractionLocked(locked, statusMessage = "") {
+  turnLocked = locked;
+  const answer = document.getElementById("answer");
+  const castButton = document.getElementById("castSpellButton");
+  if (answer) answer.disabled = locked;
+  if (castButton) castButton.disabled = locked;
+  if (locked && statusMessage) {
+    setStatus(statusMessage);
+  }
+}
+
+function runEnemyAttackPhase(counterAttack, priorText, answeredCorrectly, stance) {
+  updateTurnOrder(`Enemy Phase -> ${counterAttack.move.label}`);
+  setTurnInteractionLocked(true, `Enemy phase: ${counterAttack.move.label}`);
+  setCombatFeed(`${currentEnemy.name} gathers strength for ${counterAttack.move.label}.`);
+  showAttackBanner("Enemy Phase", `${counterAttack.move.label} is coming.`);
+
+  setTimeout(() => {
+    playerHP -= Math.max(0, counterAttack.damage - (currentEnemy.isBoss ? relicBonuses.bossWard : 0));
+    playerBarrier = Math.max(0, playerBarrier - counterAttack.blocked);
+    enemyWeaken = 0;
+    enemyStatus.chill = Math.max(0, enemyStatus.chill - 1);
+    enemyTurnCount += 1;
+    animateElementClass(".enemy-sprite", "attack", 560);
+    if (counterAttack.damage > 0) {
+      showFloatingText("playerFloaters", `-${counterAttack.damage}`, "damage");
+      playRetroTone("miss");
+    }
+    if (counterAttack.blocked > 0) {
+      showFloatingText("playerFloaters", `Block ${counterAttack.blocked}`, "buff");
+    }
+    counterAttack.move.apply();
+    clampHealth();
+    updateHealthBars();
+    if (counterAttack.damage > 0) {
+      pulsePanel("playerPanel", "hit-panel");
+    }
+    if ((currentEnemy.fury >= 3 || currentEnemy.isBoss) && enemyTurnCount >= 2 && playerHP > 0) {
+      const followUpDamage = Math.max(1, Math.round(Math.max(1, enemyAttack - getPlayerStats().ward) * 0.45));
+      playerHP -= followUpDamage;
+      showFloatingText("playerFloaters", `-${followUpDamage}`, "damage");
+      priorText += ` Follow-up strike hits for ${followUpDamage}.`;
+      clampHealth();
+      updateHealthBars();
+    }
+    setCombatFeed(
+      counterAttack.blocked > 0
+        ? `${counterAttack.move.label} slams in, but your barrier blocks ${counterAttack.blocked}.`
+        : `${counterAttack.move.label} connects. ${stance.name} stance holds the line.`
+    );
+    nextEnemyMove = planEnemyMove();
+    document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+    updateIntentChip();
+    if (currentEnemy.isBoss && (nextEnemyMove.label === "Boss Cataclysm" || nextEnemyMove.label === "Boss Guardbreak")) {
+      pulseBossWarning();
+      showPhaseBanner("Boss Warning", `${currentEnemy.name} is preparing ${nextEnemyMove.label}.`, "boss");
+    }
+    renderEnemyStats();
+
+    if (playerHP === 0) {
+      setTimeout(() => {
+        handleDefeat();
+      }, 240);
+      return;
+    }
+
+    setTimeout(() => {
+      resetCard(answeredCorrectly);
+      setTurnInteractionLocked(false);
+      if (answeredCorrectly) {
+        generateQuestion();
+      } else {
+        updateHintPanel();
+      }
+    }, 700);
+  }, 900);
+}
+
+function updateEnemyModel() {
+  const sprite = document.querySelector(".enemy-sprite");
+  const model = currentEnemy.sprite || "goblin";
+  if (!sprite) return;
+  sprite.className = `enemy-sprite model-${model} phase-${currentEnemy.phase || 1}`;
+}
+
+function planEnemyMove() {
+  const turn = enemyTurnCount + 1;
+  const baseDamage = enemyAttack;
+  const phase = currentEnemy.phase || 1;
+  const enemyKey = currentEnemy.baseName || currentEnemy.name;
+
+  if (currentEnemy.isBoss) {
+    if (turn % 3 === 0) {
+      return {
+        label: "Boss Cataclysm",
+        damage: baseDamage + 6,
+        swing: 3,
+        apply() {
+          playerStatus.burn += 1;
+          playerStatus.curse += 1;
+        }
+      };
+    }
+    if (turn % 2 === 0) {
+      return {
+        label: "Boss Guardbreak",
+        damage: baseDamage + 2,
+        swing: 2,
+        apply() {
+          playerBarrier = Math.max(0, playerBarrier - 4);
+        }
+      };
+    }
+    return { label: "Boss Pressure", damage: baseDamage + 1, swing: 2, apply() {} };
+  }
+
+  if (enemyKey === "Goblin Scout") {
+    if (turn === 1) {
+      return { label: "Ambush rush", damage: baseDamage + 3, swing: 3, apply() {} };
+    }
+    if (phase >= 3 && turn % 2 === 0) {
+      return { label: "Knife flurry", damage: baseDamage + 4, swing: 3, apply() {} };
+    }
+    if (phase >= 2 && turn % 2 === 1) {
+      return {
+        label: "Shadow sidestep",
+        damage: baseDamage + 1,
+        swing: 2,
+        apply() {
+          currentEnemy.armor += 1;
+        }
+      };
+    }
+    if (turn % 3 === 0) {
+      return { label: "Quick jab", damage: baseDamage + 2, swing: 2, apply() {} };
+    }
+    return { label: "Testing strike", damage: baseDamage, swing: 2, apply() {} };
+  }
+
+  if (enemyKey === "Bone Knight") {
+    if (turn === 1) {
+      return {
+        label: "Iron march",
+        damage: baseDamage + 2,
+        swing: 2,
+        apply() {
+          currentEnemy.armor += 1;
+        }
+      };
+    }
+    if (phase >= 3 && turn % 2 === 0) {
+      return {
+        label: "Grave cleaver",
+        damage: baseDamage + 5,
+        swing: 2,
+        apply() {
+          currentEnemy.thorns += 1;
+        }
+      };
+    }
+    if (phase >= 2 && turn % 2 === 1) {
+      return {
+        label: "Bone bulwark",
+        damage: Math.max(1, baseDamage - 3),
+        swing: 1,
+        apply() {
+          currentEnemy.armor += 2;
+        }
+      };
+    }
+    if (turn % 3 === 0) {
+      return {
+        label: "Shield stance",
+        damage: Math.max(1, baseDamage - 4),
+        swing: 1,
+        apply() {
+          currentEnemy.armor += 1;
+          currentEnemy.bonusText = "Heavy armor and bone spikes. Shield stance thickens its guard.";
+        }
+      };
+    }
+    return { label: "Bone cleave", damage: baseDamage + 1, swing: 2, apply() {} };
+  }
+
+  if (enemyKey === "Swamp Witch") {
+    if (turn === 1) {
+      return {
+        label: "Bog omen",
+        damage: baseDamage + 1,
+        swing: 2,
+        apply() {
+          playerStatus.curse += 1;
+        }
+      };
+    }
+    if (phase >= 3 && turn % 2 === 0) {
+      return {
+        label: "Rot hex",
+        damage: baseDamage + 4,
+        swing: 3,
+        apply() {
+          comboStreak = 0;
+        }
+      };
+    }
+    if (phase >= 2 && turn % 3 === 0) {
+      return {
+        label: "Leech curse",
+        damage: baseDamage + 1,
+        swing: 2,
+        apply() {
+          playerBarrier = Math.max(0, playerBarrier - 3);
+        }
+      };
+    }
+    if (turn % 2 === 0) {
+      return {
+        label: "Hex burst",
+        damage: baseDamage + 2,
+        swing: 3,
+        apply() {
+          playerBarrier = Math.max(0, playerBarrier - 2);
+        }
+      };
+    }
+    return { label: "Bog bolt", damage: baseDamage, swing: 3, apply() {} };
+  }
+
+  if (enemyKey === "Ash Drake") {
+    if (turn === 1) {
+      return {
+        label: "Cinder wake",
+        damage: baseDamage + 2,
+        swing: 2,
+        apply() {
+          currentEnemy.thorns += 1;
+        }
+      };
+    }
+    if (phase >= 3 && turn % 2 === 0) {
+      return {
+        label: "Inferno dive",
+        damage: baseDamage + 6,
+        swing: 3,
+        apply() {
+          currentEnemy.thorns += 1;
+        }
+      };
+    }
+    if (phase >= 2 && turn % 2 === 1) {
+      return {
+        label: "Cinder charge",
+        damage: baseDamage + 2,
+        swing: 2,
+        apply() {
+          currentEnemy.fury += 1;
+        }
+      };
+    }
+    if (turn % 3 === 0) {
+      return {
+        label: "Flare breath",
+        damage: baseDamage + 4,
+        swing: 3,
+        apply() {
+          currentEnemy.thorns += 1;
+        }
+      };
+    }
+    return { label: "Scorching rake", damage: baseDamage + 1, swing: 2, apply() {} };
+  }
+
+  if (enemyKey === "Blood Archivist") {
+    if (turn === 1) {
+      return {
+        label: "Ink bind",
+        damage: baseDamage + 1,
+        swing: 2,
+        apply() {
+          enemyWeaken = Math.max(0, enemyWeaken - 1);
+          playerStatus.curse += 1;
+        }
+      };
+    }
+    if (phase >= 3 && turn % 2 === 0) {
+      return {
+        label: "Ritual break",
+        damage: baseDamage + 5,
+        swing: 3,
+        apply() {
+          comboStreak = 0;
+          playerStatus.curse += 1;
+        }
+      };
+    }
+    if (phase >= 2 && turn % 3 === 0) {
+      return {
+        label: "Blood script",
+        damage: baseDamage + 2,
+        swing: 2,
+        apply() {
+          playerBarrier = Math.max(0, playerBarrier - 3);
+        }
+      };
+    }
+    return { label: "Archive lash", damage: baseDamage + 1, swing: 2, apply() {} };
+  }
+
+  if (enemyKey === "Thorn Behemoth") {
+    if (turn === 1) {
+      return {
+        label: "Rooted stance",
+        damage: baseDamage,
+        swing: 1,
+        apply() {
+          currentEnemy.thorns += 1;
+          currentEnemy.armor += 1;
+        }
+      };
+    }
+    if (phase >= 3 && turn % 2 === 0) {
+      return {
+        label: "Root storm",
+        damage: baseDamage + 6,
+        swing: 3,
+        apply() {
+          currentEnemy.thorns += 1;
+        }
+      };
+    }
+    if (phase >= 2 && turn % 2 === 1) {
+      return {
+        label: "Bark wall",
+        damage: Math.max(1, baseDamage - 2),
+        swing: 1,
+        apply() {
+          currentEnemy.armor += 2;
+        }
+      };
+    }
+    return { label: "Bramble slam", damage: baseDamage + 2, swing: 2, apply() {} };
+  }
+
+  if (phase >= 3 && turn % 2 === 0) {
+    return {
+      label: "Cataclysm crush",
+      damage: baseDamage + 7,
+      swing: 3,
+      apply() {
+        currentEnemy.fury += 1;
+        currentEnemy.armor += 1;
+      }
+    };
+  }
+
+  if (phase >= 2 && turn % 2 === 1) {
+    return {
+      label: "Void pulse",
+      damage: baseDamage + 3,
+      swing: 2,
+      apply() {
+        playerBarrier = Math.max(0, playerBarrier - 2);
+      }
+    };
+  }
+
+  if (turn % 3 === 0) {
+    return {
+      label: "Titan crash",
+      damage: baseDamage + 5,
+      swing: 3,
+      apply() {
+        currentEnemy.fury += 1;
+      }
+    };
+  }
+
+  return { label: "Void hammer", damage: baseDamage + 1, swing: 3, apply() {} };
+}
+
+function renderPlayerStats() {
+  const stats = getSharedPlayerStats();
+  document.getElementById("playerStatsPanel").innerHTML = `
+    <div><strong>Health:</strong> ${stats.health}</div>
+    <div><strong>Attack:</strong> ${stats.attack}</div>
+    <div><strong>Armor:</strong> ${stats.armor}</div>
+    <div><strong>Crit:</strong> ${stats.crit}%</div>
+    <div><strong>Recovery:</strong> ${stats.heal}%</div>
+    <div><strong>Speed:</strong> ${stats.fury}</div>
+    <div><strong>Thorns:</strong> ${stats.thorns}</div>
+  `;
+}
+
+function renderEnemyStats() {
+  const stats = getSharedEnemyStats();
+  document.getElementById("enemyStatsPanel").innerHTML = `
+    <div><strong>Health:</strong> ${stats.health}</div>
+    <div><strong>Attack:</strong> ${stats.attack}</div>
+    <div><strong>Armor:</strong> ${stats.armor}</div>
+    <div><strong>Crit:</strong> ${stats.crit}%</div>
+    <div><strong>Recovery:</strong> ${stats.heal}</div>
+    <div><strong>Speed:</strong> ${stats.fury}</div>
+    <div><strong>Thorns:</strong> ${stats.thorns}</div>
+  `;
+}
+
+function getRewardKeyword(item) {
+  if (item.type === "potion") return "Recovery";
+  if (item.type === "relic") return "Relic";
+  if ((item.thorns || 0) > 0) return "Thorns";
+  if ((item.ward || 0) >= (item.power || 0) + 1) return "Defense";
+  if ((item.lifesteal || 0) >= 2) return "Recovery";
+  if ((item.crit || 0) >= 5) return "Crit";
+  return "Damage";
+}
+
+function getIntentKind() {
+  const label = nextEnemyMove?.label || "";
+  if (/curse|hex|omen|ink/i.test(label)) return "curse";
+  if (/guard|bulwark|shield|stance|wall/i.test(label)) return "guard";
+  if (/cataclysm|charge|inferno|storm|flurry/i.test(label)) return "charge";
+  return "attack";
+}
+
+function updateIntentChip() {
+  const chip = document.getElementById("enemyIntentChip");
+  if (!chip) return;
+  const kind = getIntentKind();
+  chip.className = `intent-chip ${kind}`;
+  chip.innerText = kind === "guard" ? "Guard" : kind === "curse" ? "Curse" : kind === "charge" ? "Charge" : "Attack";
+}
+
+function formatSpellCard(spell) {
+  const shared = getSharedSpellStats(spell);
+  return `
+    <span class="card-rarity">${spell.rarity}</span>
+    <span class="card-title">${spell.name} Lv.${spell.spellLevel}</span>
+    <span class="level-requirement">Requires Level ${spell.minLevel}</span>
+    <span class="reward-keyword">${getRewardKeyword(spell)}</span>
+    ${getSpellArtMarkup(spell, "small")}
+    <span class="card-meta">${spell.evolutionTier === 2 ? "Ascended" : spell.evolutionTier === 1 ? "Awakened" : "Base Form"}</span>
+    <span class="card-meta">${formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" })}</span>
+    <span class="card-copy">${spell.text}</span>
+    <span class="card-meta">${getSpellEffectText(spell)}</span>
+  `;
+}
+
+function formatRelicCard(relic) {
+  return `
+    <span class="card-rarity">Relic</span>
+    <span class="card-title">${relic.name}</span>
+    <span class="reward-keyword">Relic</span>
+    <span class="card-meta">${relic.line1}</span>
+    <span class="card-meta">${relic.line2}</span>
+    <span class="card-meta">${relic.text}</span>
+  `;
+}
+
+function formatPotionCard(potion) {
+  const shared = {
+    health: potion.vitality,
+    attack: potion.power,
+    armor: potion.ward,
+    crit: 0,
+    heal: potion.lifesteal,
+    fury: 1,
+    thorns: 0
+  };
+  return `
+    <span class="card-rarity">${potion.rarity}</span>
+    <span class="card-title">${potion.name}</span>
+    <span class="reward-keyword">${getRewardKeyword(potion)}</span>
+    <span class="card-meta">Restore ${potion.health} HP immediately</span>
+    <span class="card-meta">${formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" })}</span>
+    <span class="card-meta">${potion.text}</span>
+  `;
+}
+
+function formatDeathBlessing(choice) {
+  return `
+    <span class="card-rarity">Blessing</span>
+    <span class="card-title">${choice.name}</span>
+    <span class="reward-keyword">Growth</span>
+    <span class="card-meta">${choice.line1}</span>
+    <span class="card-meta">${choice.line2}</span>
+    <span class="card-meta">${choice.text}</span>
+  `;
+}
+
+function buildHintMarkup() {
+  if (!currentQuestionData) {
+    return "<div>No hint yet. Pick a level to generate a question.</div>";
+  }
+
+  const revealAnswer = questionMisses >= 2;
+
+  if (currentQuestionData.type === "add") {
+    return `
+      <div><strong>Guide:</strong> Break the sum into a start number and a small count forward.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> Count forward ${currentQuestionData.b} more.</div>
+      <div><strong>Check:</strong> ${currentQuestionData.a} + ${currentQuestionData.b} = ?</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} + ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "add-missing") {
+    return `
+      <div><strong>Guide:</strong> Find the missing part by comparing the total and the known addend.</div>
+      <div><strong>Step 1:</strong> The total is ${currentQuestionData.total}.</div>
+      <div><strong>Step 2:</strong> Take away the known part: ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ? + ${currentQuestionData.b} = ${currentQuestionData.total}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.total} - ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "subtract") {
+    return `
+      <div><strong>Guide:</strong> Start with the larger number and take away step by step.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> Count backward ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> What is left after taking away ${currentQuestionData.b}?</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} - ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "subtract-missing") {
+    return `
+      <div><strong>Guide:</strong> Ask how much was taken away from the starting number.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> End at ${currentQuestionData.result}.</div>
+      <div><strong>Check:</strong> ${currentQuestionData.a} - ? = ${currentQuestionData.result}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} - ${currentQuestionData.result} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "subtract-start") {
+    return `
+      <div><strong>Guide:</strong> Rebuild the starting number by adding back what was removed.</div>
+      <div><strong>Step 1:</strong> The ending number is ${currentQuestionData.result}.</div>
+      <div><strong>Step 2:</strong> Add back ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ? - ${currentQuestionData.b} = ${currentQuestionData.result}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.result} + ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "multiply") {
+    return `
+      <div><strong>Guide:</strong> Turn multiplication into repeated addition.</div>
+      <div><strong>Step 1:</strong> Think of ${currentQuestionData.a} groups of ${currentQuestionData.b}.</div>
+      <div><strong>Step 2:</strong> Add ${currentQuestionData.b} repeatedly: ${currentQuestionData.repeatText}</div>
+      <div><strong>Check:</strong> Multiplication is repeated addition.</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.repeatText} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "multiply-missing") {
+    return `
+      <div><strong>Guide:</strong> Find the missing factor that makes the product.</div>
+      <div><strong>Step 1:</strong> The full product is ${currentQuestionData.product}.</div>
+      <div><strong>Step 2:</strong> Divide by the known factor ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ? x ${currentQuestionData.b} = ${currentQuestionData.product}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.product} / ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "divide") {
+    const skipCounts = Array.from({ length: currentAnswer }, (_, index) => currentQuestionData.b * (index + 1)).join(", ");
+    return `
+      <div><strong>Guide:</strong> Use multiplication to reverse the division.</div>
+      <div><strong>Step 1:</strong> Ask: ${currentQuestionData.b} times what number makes ${currentQuestionData.a}?</div>
+      <div><strong>Step 2:</strong> Try skip-counting by ${currentQuestionData.b}.</div>
+      <div><strong>Check:</strong> ${currentQuestionData.b} x ? = ${currentQuestionData.a}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${skipCounts}. So ${currentQuestionData.a} / ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "divide-missing") {
+    return `
+      <div><strong>Guide:</strong> The missing divisor tells how many equal groups fit.</div>
+      <div><strong>Step 1:</strong> Start with ${currentQuestionData.a}.</div>
+      <div><strong>Step 2:</strong> If each group becomes ${currentQuestionData.quotient}, what divisor works?</div>
+      <div><strong>Check:</strong> ${currentQuestionData.a} / ? = ${currentQuestionData.quotient}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} / ${currentQuestionData.quotient} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "divide-start") {
+    return `
+      <div><strong>Guide:</strong> Rebuild the starting number from divisor and quotient.</div>
+      <div><strong>Step 1:</strong> Multiply the quotient ${currentQuestionData.quotient} by the divisor ${currentQuestionData.b}.</div>
+      <div><strong>Step 2:</strong> That gives the missing starting number.</div>
+      <div><strong>Check:</strong> ? / ${currentQuestionData.b} = ${currentQuestionData.quotient}</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.quotient} x ${currentQuestionData.b} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  if (currentQuestionData.type === "grouped-order") {
+    const groupedSum = currentQuestionData.a + currentQuestionData.b;
+    return `
+      <div><strong>Guide:</strong> Parentheses go first.</div>
+      <div><strong>Step 1:</strong> Add inside the parentheses: ${currentQuestionData.a} + ${currentQuestionData.b} = ${groupedSum}</div>
+      <div><strong>Step 2:</strong> Multiply ${groupedSum} by ${currentQuestionData.c}.</div>
+      <div><strong>Check:</strong> Solve inside () before multiplying.</div>
+      ${revealAnswer ? `<div><strong>Worked Example:</strong> (${currentQuestionData.a} + ${currentQuestionData.b}) x ${currentQuestionData.c} = ${currentAnswer}</div>` : ""}
+    `;
+  }
+
+  const multiplied = currentQuestionData.a * currentQuestionData.b;
+  return `
+    <div><strong>Guide:</strong> Solve the multiplication part before the addition.</div>
+    <div><strong>Step 1:</strong> Do multiplication first: ${currentQuestionData.a} x ${currentQuestionData.b}</div>
+    <div><strong>Step 2:</strong> Then add ${currentQuestionData.c} to ${multiplied}.</div>
+    <div><strong>Check:</strong> Follow order of operations, multiplication before addition.</div>
+    ${revealAnswer ? `<div><strong>Worked Example:</strong> ${currentQuestionData.a} x ${currentQuestionData.b} = ${multiplied}, then ${multiplied} + ${currentQuestionData.c} = ${currentAnswer}</div>` : ""}
+  `;
+}
+
+function updateHintPanel() {
+  const hintPanel = document.getElementById("hintPanel");
+  if (hintPanel.style.display === "none") {
+    return;
+  }
+
+  hintPanel.innerHTML = buildHintMarkup();
+}
+
+function toggleHint() {
+  const hintPanel = document.getElementById("hintPanel");
+  const showing = hintPanel.style.display !== "none";
+  hintPanel.style.display = showing ? "none" : "block";
+  if (!showing) {
+    hintPanel.innerHTML = buildHintMarkup();
+  }
+}
+
+function renderSpellBook() {
+  const grid = document.getElementById("spellGrid");
+  grid.innerHTML = "";
+  document.getElementById("cardsEarned").innerText = getOwnedSpellIds().length;
+
+  getOwnedSpellIds().forEach((id) => {
+    const spell = getScaledSpellStats(getSpellById(id));
+    const rankClass = spell.spellLevel >= 5 ? " rank-5" : spell.spellLevel >= 3 ? " rank-3" : "";
+    const button = document.createElement("button");
+    button.className = "spell-button" + rankClass + (id === currentSpellId ? " selected" : "");
+    button.onclick = () => selectSpell(id);
+    button.innerHTML = formatSpellCard(spell);
+    grid.appendChild(button);
+  });
+
+  renderPlayerStats();
+  renderRelics();
+  updateSelectedSpell();
+}
+
+function selectSpell(id) {
+  currentSpellId = id;
+  renderSpellBook();
+
+  const spell = getScaledSpellStats(getCurrentSpell());
+  if (level && level < spell.minLevel) {
+    setStatus(`${spell.name} needs level ${spell.minLevel}. Choose a tougher difficulty to use it.`);
+    document.getElementById("question").innerText = `Choose at least Level ${spell.minLevel}`;
+  } else if (level) {
+    setStatus(`${spell.name} is highlighted in your spellbook. Combat still draws a random playable card each cast.`);
+    generateQuestion();
+  } else {
+    setStatus(`${spell.name} highlighted. Pick a level to begin drawing random combat cards.`);
+  }
+}
+
+function updateSelectedSpell() {
+  const spell = getScaledSpellStats(getCurrentSpell());
+  const stats = getPlayerStats();
+  const stance = getStanceConfig();
+  const shared = getSharedSpellStats(spell);
+  const preview = level ? Math.max(1, level * 8 + spell.baseDamage + stats.power + stance.damageBonus + Math.min(comboStreak * 2, 12) - currentEnemy.armor) : spell.baseDamage + stats.power + stance.damageBonus;
+  const shell = document.querySelector(".selected-card-shell");
+  if (shell) {
+    shell.classList.remove("rank-3", "rank-5");
+    if (spell.spellLevel >= 5) shell.classList.add("rank-5");
+    else if (spell.spellLevel >= 3) shell.classList.add("rank-3");
+  }
+  document.getElementById("activeSpellName").innerText = spell.name;
+  document.getElementById("selectedCardTag").innerText = `Drawn ${spell.rarity} Lv.${spell.spellLevel} ${spell.evolutionTier === 2 ? "Ascended" : spell.evolutionTier === 1 ? "Awakened" : "Spell"}`;
+  document.getElementById("selectedCardName").innerText = spell.name;
+  document.getElementById("selectedCardText").innerText = getBattleCardText(spell.text);
+  document.getElementById("selectedCardRules").innerText = `Requires Level ${spell.minLevel} | ${formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" })}`;
+  document.getElementById("selectedCardArt").innerHTML = getSpellArtMarkup(spell, "large");
+  document.getElementById("spellDamage").innerText = preview;
+  updateStanceButtons();
+  if (document.getElementById("cardPopup").classList.contains("show")) {
+    openCardPopup();
+  }
+}
+
+function getMilestoneChoices() {
+  return [
+    {
+      id: "spring",
+      name: "Moonspring Rest",
+      line1: "Heal 35% max HP",
+      line2: "Ward +1",
+      text: "A silver spring restores strength and hardens your guard.",
+      apply() {
+        const heal = Math.round(maxPlayerHP * 0.35);
+        playerHP = Math.min(maxPlayerHP, playerHP + heal);
+        potionBonuses.ward += 1;
+      }
+    },
+    {
+      id: "forge",
+      name: "Rune Forge",
+      line1: "Upgrade current spell +1",
+      line2: "Power +1",
+      text: "A forge-tempest etches a sharper edge into your favorite spell.",
+      apply() {
+        spellLevels[currentSpellId] = (spellLevels[currentSpellId] || 1) + 1;
+        potionBonuses.power += 1;
+      }
+    },
+    {
+      id: "library",
+      name: "Star Library",
+      line1: "Focus +2",
+      line2: "Lifesteal +2%",
+      text: "Ancient notes steady your aim and improve your recovery.",
+      apply() {
+        potionBonuses.focus += 2;
+        potionBonuses.lifesteal += 2;
+      }
+    }
+  ];
+}
+
+function showMilestoneChoices() {
+  milestoneChoices = getMilestoneChoices();
+  const milestoneGrid = document.getElementById("milestoneGrid");
+  milestoneGrid.innerHTML = "";
+
+  milestoneChoices.forEach((choice) => {
+    const button = document.createElement("button");
+    button.className = "reward-choice";
+    button.onclick = () => claimMilestone(choice.id);
+    button.innerHTML = formatDeathBlessing(choice);
+    milestoneGrid.appendChild(button);
+  });
+
+  document.getElementById("milestonePanel").classList.add("show");
+  setStatus("A milestone boon is ready. Choose one blessing before the next enemy.");
+}
+
+function claimMilestone(choiceId) {
+  const choice = milestoneChoices.find((item) => item.id === choiceId);
+  if (!choice) return;
+
+  choice.apply();
+  milestoneChoices = [];
+  recalculatePlayerTotals(false);
+  document.getElementById("milestonePanel").classList.remove("show");
+  loadNextEnemy();
+  renderSpellBook();
+  updateHealthBars();
+  generateQuestion();
+  setStatus(`${choice.name} strengthens your run for the next stretch.`);
+  setCombatFeed(choice.text);
+}
+
+function showRelicChoices() {
+  const relicGrid = document.getElementById("relicGrid");
+  relicGrid.innerHTML = "";
+  relicChoices = [...relicPool].sort(() => Math.random() - 0.5).slice(0, 3);
+
+  relicChoices.forEach((relic) => {
+    const button = document.createElement("button");
+    button.className = "reward-choice";
+    button.onclick = () => claimRelic(relic.id);
+    button.innerHTML = formatRelicCard(relic);
+    relicGrid.appendChild(button);
+  });
+
+  document.getElementById("relicPanel").classList.add("show");
+  setStatus("A relic chamber opens. Choose one permanent artifact.");
+}
+
+function claimRelic(relicId) {
+  const relic = relicChoices.find((item) => item.id === relicId);
+  if (!relic) return;
+  relic.apply();
+  if (!ownedRelics.some((item) => item.id === relic.id)) {
+    ownedRelics.push(relic);
+  }
+  relicChoices = [];
+  document.getElementById("relicPanel").classList.remove("show");
+  recalculatePlayerTotals(false);
+  battleCount += 1;
+  playerHP = Math.min(maxPlayerHP, playerHP + Math.round(maxPlayerHP * 0.18));
+  renderSpellBook();
+  updateHealthBars();
+  loadNextEnemy();
+  generateQuestion();
+  showPhaseBanner("Relic Claimed", `${relic.name} now empowers the run.`, "heal");
+  setStatus(`${relic.name} binds itself to your run.`);
+  setCombatFeed(relic.text);
+}
+
+function generateQuestion() {
+  if (!level) {
+    currentAnswer = null;
+    currentQuestionData = null;
+    currentRuneTrial = null;
+    selectedRuneChoice = null;
+    document.getElementById("question").innerText = "Pick a level and a spell card";
+    document.getElementById("questionTwist").innerText = "Ritual Twist: None";
+    updateHintPanel();
+    updateSelectedSpell();
+    return;
+  }
+
+  drawCombatSpell();
+  let spell = getScaledSpellStats(getCurrentSpell());
+  const profile = getMathProfile();
+  questionMisses = 0;
+
+  if (level < spell.minLevel) {
+    const playable = getPlayableSpellIds().find((id) => getScaledSpellStats(getSpellById(id)).minLevel <= level);
+    if (playable) {
+      currentSpellId = playable;
+      spell = getScaledSpellStats(getCurrentSpell());
+    }
+  }
+
+  let a;
+  let b;
+  let q;
+
+  if (level === 1) {
+    a = rand(profile.add.a[0], profile.add.a[1]);
+    b = rand(profile.add.b[0], profile.add.b[1]);
+    currentAnswer = a + b;
+    currentQuestionData = { type: "add", a, b };
+    q = `${a} + ${b}`;
+  } else if (level === 2) {
+    a = rand(profile.subtract.a[0], profile.subtract.a[1]);
+    b = rand(profile.subtract.b[0], profile.subtract.b[1]);
+    currentAnswer = a - b;
+    currentQuestionData = { type: "subtract", a, b };
+    q = `${a} - ${b}`;
+  } else if (level === 3) {
+    a = rand(profile.multiply.a[0], profile.multiply.a[1]);
+    b = rand(profile.multiply.b[0], profile.multiply.b[1]);
+    currentAnswer = a * b;
+    currentQuestionData = {
+      type: "multiply",
+      a,
+      b,
+      repeatText: Array.from({ length: a }, () => b).join(" + ")
+    };
+    q = `${a} x ${b}`;
+  } else if (level === 4) {
+    b = rand(profile.divide.b[0], profile.divide.b[1]);
+    currentAnswer = rand(profile.divide.answer[0], profile.divide.answer[1]);
+    a = currentAnswer * b;
+    currentQuestionData = { type: "divide", a, b };
+    q = `${a} / ${b}`;
+  } else {
+    a = rand(profile.order.a[0], profile.order.a[1]);
+    b = rand(profile.order.b[0], profile.order.b[1]);
+    const c = rand(profile.order.c[0], profile.order.c[1]);
+    currentAnswer = a * b + c;
+    currentQuestionData = { type: "order", a, b, c };
+    q = `${a} x ${b} + ${c}`;
+  }
+
+  document.getElementById("question").innerText = q;
+  document.getElementById("answer").value = "";
+  rollQuestionTwist();
+  updateHintPanel();
+  updateSelectedSpell();
+}
+
+function submitAnswer() {
+  if (turnLocked) {
+    setStatus("Wait for the enemy phase to finish.");
+    return;
+  }
+
+  if (rewardChoices.length > 0 || deathChoices.length > 0 || milestoneChoices.length > 0 || relicChoices.length > 0) {
+    setStatus("Choose your pending reward, blessing, or milestone boon before continuing.");
+    return;
+  }
+
+  if (currentAnswer === null) {
+    setStatus("Choose a valid level and spell before casting.");
+    return;
+  }
+
+  const answerField = document.getElementById("answer");
+  if (answerField.value.trim() === "") {
+    setStatus("Enter an answer before casting.");
+    return;
+  }
+
+  const user = Number(answerField.value);
+  const answeredCorrectly = user === currentAnswer;
+  const stats = getPlayerStats();
+  const stance = getStanceConfig();
+  const attackRoll = calculateDamage(null);
+  let text = "";
+
+  if (playerStatus.burn > 0) {
+    const burnTick = playerStatus.burn;
+    playerHP -= burnTick;
+    playerStatus.burn = Math.max(0, playerStatus.burn - 1);
+    text += ` Burn scorches you for ${burnTick}.`;
+  }
+
+  if (enemyStatus.burn > 0) {
+    const enemyBurnTick = enemyStatus.burn;
+    enemyHP -= enemyBurnTick;
+    enemyStatus.burn = Math.max(0, enemyStatus.burn - 1);
+    text += ` Enemy burn deals ${enemyBurnTick}.`;
+  }
+
+  if (answeredCorrectly) {
+    comboStreak += 1;
+    enemyHP -= attackRoll.value;
+    animateElementClass(".enemy-stage", "shake", 200);
+    animateElementClass(".enemy-sprite", "hit", 200);
+    showFloatingText("enemyFloaters", `-${attackRoll.value}`, attackRoll.crit ? "buff" : "damage");
+    playRetroTone(attackRoll.crit ? "phase" : "hit");
+    score += attackRoll.value + Math.floor((battleCount - 1) / enemyRoster.length) * 5 + comboStreak;
+    text = attackRoll.crit
+      ? `Crit ${attackRoll.value}`
+      : `Hit ${attackRoll.value}`;
+    text += ` ${attackRoll.stanceName} stance adds ${attackRoll.comboBonus} combo damage.`;
+
+    if (stats.lifesteal + attackRoll.extraLifesteal > 0) {
+      const healPenalty = playerStatus.curse > 0 ? Math.min(0.5, playerStatus.curse * 0.15) : 0;
+      const heal = Math.max(1, Math.round((attackRoll.value * (stats.lifesteal + attackRoll.extraLifesteal)) / 100 * (1 - healPenalty)));
+      playerHP = Math.min(maxPlayerHP, playerHP + heal);
+      showFloatingText("playerFloaters", `+${heal}`, "heal");
+      playRetroTone("heal");
+      text += ` You heal ${heal}.`;
+    }
+
+    const totalBarrier = attackRoll.barrierGain;
+    if (totalBarrier > 0) {
+      playerBarrier += totalBarrier;
+      showFloatingText("playerFloaters", `Barrier +${totalBarrier}`, "buff");
+      text += ` Barrier +${totalBarrier}.`;
+    }
+
+    const totalWeaken = attackRoll.weakenGain;
+    if (totalWeaken > 0) {
+      enemyWeaken += totalWeaken;
+      enemyStatus.chill += 1;
+      showFloatingText("enemyFloaters", `Weaken ${totalWeaken}`, "buff");
+      text += ` Enemy attack weakened by ${totalWeaken}.`;
+    }
+
+    if (comboStreak > 0 && comboStreak % 3 === 0) {
+      playerBarrier += 3;
+      enemyWeaken += 1;
+      showFloatingText("playerFloaters", "Combo Surge", "buff");
+      showFloatingText("enemyFloaters", "Weaken 1", "buff");
+      text += " Combo surge grants Barrier +3 and Weaken 1.";
+    } else if (comboStreak >= 2) {
+      showFloatingText("playerFloaters", `Combo ${comboStreak}`, "buff");
+    }
+
+    if (["ember", "nova", "meteor"].includes(getCurrentSpell().id)) {
+      enemyStatus.burn += 1 + relicBonuses.burnBoost;
+      text += ` Burn +${1 + relicBonuses.burnBoost}.`;
+    }
+
+    if (currentTwist?.id === "steady") {
+      playerBarrier += 2;
+      text += " Steady Sigil hardens your barrier.";
+    }
+
+    if (currentEnemy.thorns > 0) {
+      const thornDamage = Math.max(1, currentEnemy.thorns - stats.ward);
+      playerHP -= thornDamage;
+      showFloatingText("playerFloaters", `-${thornDamage}`, "damage");
+      text += ` Thorns strike back for ${thornDamage}.`;
+    }
+
+    maybeAdvanceEnemyPhase();
+
+    if (attackRoll.crit) {
+      pulsePanel("playerPanel", "crit-panel");
+      pulsePanel("enemyPanel", "hit-panel");
+      setCombatFeed(`Critical ${attackRoll.stanceName.toLowerCase()} magic tears through the battlefield. Combo ${comboStreak}.`);
+    } else {
+      pulsePanel("enemyPanel", "hit-panel");
+      setCombatFeed(`Your ${getCurrentSpell().name} lands cleanly in ${attackRoll.stanceName.toLowerCase()} stance. Combo ${comboStreak}.`);
+    }
+
+    setStatus("Correct answer. Spell cast cleanly.");
+  } else {
+    comboStreak = 0;
+    const mercyScale = currentTwist?.id === "mercy" ? 0.7 : 1;
+    const greedyScale = currentTwist?.id === "greedy" ? 1.15 : 1;
+    const reflected = Math.max(1, Math.round((attackRoll.value - stats.ward - attackRoll.wardBonus - relicBonuses.ward) * getEarlyBattleProtection() * attackRoll.reflectScale * mercyScale * greedyScale));
+    playerHP -= reflected;
+    animateElementClass("#playerCard", "flip", 340);
+    showFloatingText("playerFloaters", `-${reflected}`, "damage");
+    showFloatingText("playerFloaters", "Combo Lost", "damage");
+    playRetroTone("miss");
+    questionMisses += 1;
+    const hintPanel = document.getElementById("hintPanel");
+    hintPanel.style.display = "block";
+    hintPanel.innerHTML = buildHintMarkup();
+    text = `Reflect ${reflected}`;
+    if (battleCount <= 2) {
+      text += " Early-battle protection softens the blow.";
+    }
+    if (questionMisses === 1) {
+      text += " A guided hint opens to help with the next try.";
+    } else {
+      text += " The hint now shows a worked example.";
+    }
+    text += ` ${stance.name} stance ${stance.reflectScale < 1 ? "softens" : "risks"} the backlash.`;
+    pulsePanel("playerPanel", "hit-panel");
+    setStatus("Wrong answer. The spell reflected back at you.");
+    setCombatFeed("Your spell slips. The backlash bites, but the run still gives you room to learn.");
+  }
+
+  clampHealth();
+  updateHealthBars();
+  document.getElementById("score").innerText = score;
+
+  if (enemyHP === 0) {
+    if (embedMode) {
+      setStatus("Enemy defeated.");
+      setCombatFeed("The encounter breaks under your spellcraft.");
+      notifyEmbedResult("win");
+      return;
+    }
+    if (relicBonuses.cleanse) {
+      playerStatus.curse = Math.max(0, playerStatus.curse - 1);
+    }
+    setStatus(currentEnemy.isBoss ? "Boss defeated. Claim a relic." : "Enemy defeated. Draft one of three spell cards.");
+    setTimeout(() => {
+      if (currentEnemy.isBoss) {
+        showRelicChoices();
+      } else {
+        awardSpellChoices();
+      }
+    }, 420);
+    return;
+  }
+
+  if (playerHP === 0) {
+    setTimeout(() => {
+      handleDefeat();
+    }, 420);
+    return;
+  }
+
+  const counterAttack = calculateEnemyAttack();
+  runEnemyAttackPhase(counterAttack, text, answeredCorrectly, stance);
+}
+
+function handleDefeat() {
+  if (embedMode) {
+    setStatus("Your magic falters.");
+    setCombatFeed("The encounter slips away from your grasp.");
+    notifyEmbedResult("lose");
+    return;
+  }
+  showDeathBlessings();
+  setStatus("Defeat has opened a blessing path. Choose how your next run improves.");
+}
+
+function getDeathBlessingChoices() {
+  return [
+    {
+      id: "ember-oath",
+      name: "Ember Oath",
+      line1: "Power +1 | Focus +1",
+      line2: "Vitality +4",
+      text: "Strike harder on the next run with a more explosive spell path.",
+      apply() {
+        deathBlessings.power += 1;
+        deathBlessings.focus += 1;
+        deathBlessings.vitality += 4;
+      }
+    },
+    {
+      id: "iron-bark",
+      name: "Iron Bark Vow",
+      line1: "Ward +2 | Vitality +10",
+      line2: "Power +0",
+      text: "Turn the next run into a sturdier climb with heavier protection.",
+      apply() {
+        deathBlessings.ward += 2;
+        deathBlessings.vitality += 10;
+      }
+    },
+    {
+      id: "moonwell",
+      name: "Moonwell Grace",
+      line1: "Lifesteal +1% | Vitality +8",
+      line2: "Focus +1",
+      text: "Build a safer recovery loop and stronger sustain for the next run.",
+      apply() {
+        deathBlessings.lifesteal += 1;
+        deathBlessings.vitality += 8;
+        deathBlessings.focus += 1;
+      }
+    }
+  ];
+}
+
+function showDeathBlessings() {
+  deathChoices = getDeathBlessingChoices();
+  const deathGrid = document.getElementById("deathGrid");
+  deathGrid.innerHTML = "";
+
+  deathChoices.forEach((choice) => {
+    const button = document.createElement("button");
+    button.className = "reward-choice";
+    button.onclick = () => claimDeathBlessing(choice.id);
+    button.innerHTML = formatDeathBlessing(choice);
+    deathGrid.appendChild(button);
+  });
+
+  document.getElementById("deathPanel").classList.add("show");
+  setStatus("Choose a death blessing to empower your next run.");
+}
+
+function claimDeathBlessing(choiceId) {
+  const choice = deathChoices.find((item) => item.id === choiceId);
+  if (!choice) {
+    return;
+  }
+
+  deathBlessings.deaths += 1;
+  choice.apply();
+  deathChoices = [];
+  document.getElementById("deathPanel").classList.remove("show");
+  alert(`${choice.name} empowers your next run.`);
+  resetRun();
+}
+
+function getRewardChoices() {
+  const allowedRarities = getAllowedRarities();
+  const eligibleSpells = spellPool.filter((spell) => allowedRarities.includes(spell.rarity));
+  const pool = [...eligibleSpells];
+  const picks = [];
+
+  while (pool.length > 0 && picks.length < 3) {
+    const index = rand(0, pool.length - 1);
+    picks.push(pool.splice(index, 1)[0]);
+  }
+
+  if (picks.length < 3) {
+    const fallback = eligibleSpells;
+    fallback.forEach((spell) => {
+      if (picks.length < 3 && !picks.some((item) => item.id === spell.id)) {
+        picks.push(spell);
+      }
+    });
+  }
+
+  const potionChance = battleCount % 3 === 0 ? 60 : 30;
+  if (rand(1, 100) <= potionChance) {
+    const potion = potionPool[rand(0, potionPool.length - 1)];
+    picks[rand(0, picks.length - 1)] = potion;
+  }
+
+  return picks;
+}
+
+function awardSpellChoices() {
+  resetCard();
+  rewardChoices = getRewardChoices();
+  const rewardGrid = document.getElementById("rewardGrid");
+  rewardGrid.innerHTML = "";
+
+  rewardChoices.forEach((spell) => {
+    const button = document.createElement("button");
+    button.className = "reward-choice";
+    button.onclick = () => claimReward(spell.id);
+    button.innerHTML = spell.type === "potion" ? formatPotionCard(spell) : formatSpellCard(spell);
+    rewardGrid.appendChild(button);
+  });
+
+  document.getElementById("rewardPanel").classList.add("show");
+}
+
+function claimReward(spellId) {
+  if (rewardChoices.length === 0) {
+    return;
+  }
+
+  const reward = rewardChoices.find((item) => item.id === spellId);
+  if (!reward) {
+    return;
+  }
+
+  let duplicateSpellReward = false;
+
+  if (reward.type === "potion") {
+    potionBonuses.power += reward.power;
+    potionBonuses.ward += reward.ward;
+    potionBonuses.focus += reward.focus;
+    potionBonuses.vitality += reward.vitality;
+    potionBonuses.lifesteal += reward.lifesteal;
+  } else {
+    if (!spellLevels[spellId]) {
+      spellLevels[spellId] = 1;
+    } else {
+      duplicateSpellReward = true;
+      spellLevels[spellId] += 1;
+    }
+    currentSpellId = spellId;
+  }
+
+  rewardChoices = [];
+  document.getElementById("rewardPanel").classList.remove("show");
+
+  recalculatePlayerTotals(true);
+  battleCount += 1;
+  playerHP = Math.min(maxPlayerHP, playerHP + Math.round(maxPlayerHP * 0.15) + (reward.health || 0));
+
+  let extraMessage = "";
+  if (battleCount % 3 === 0) {
+    const milestoneHeal = Math.round(maxPlayerHP * 0.2);
+    playerHP = Math.min(maxPlayerHP, playerHP + milestoneHeal);
+    extraMessage = ` A moonwell restores ${milestoneHeal} HP before the next battle.`;
+  }
+
+  renderSpellBook();
+  updateHealthBars();
+  const rewardMessage =
+    reward.type === "potion"
+      ? `${reward.name} restored your strength and left a permanent blessing behind.${extraMessage}`
+      : duplicateSpellReward
+        ? `${getCurrentSpell().name} rose to rank ${getSpellLevel(spellId)} and grew stronger.${getSpellLevel(spellId) === 3 || getSpellLevel(spellId) === 5 ? " It evolved." : ""}${extraMessage}`
+        : `You claimed ${getCurrentSpell().name}. Your permanent bonuses grew and you recovered some HP.${extraMessage}`;
+
+  if (battleCount % 4 === 0) {
+    document.getElementById("rewardPanel").classList.remove("show");
+    showMilestoneChoices();
+    setCombatFeed("A milestone chamber opens between battles.");
+    return;
+  }
+
+  loadNextEnemy();
+  generateQuestion();
+  setStatus(rewardMessage);
+  setCombatFeed("New power settles into your spellbook.");
+}
+
+function loadNextEnemy() {
+  enemyIndex = (battleCount - 1) % enemyRoster.length;
+  const cycle = Math.floor((battleCount - 1) / enemyRoster.length);
+  const baseEnemy = enemyRoster[enemyIndex];
+  const isBossBattle = !embedMode && battleCount > 0 && battleCount % 5 === 0;
+  const gameProfile = getGameProfile();
+  const scaledArmor = baseEnemy.armor + Math.floor(cycle / 1.5);
+  const scaledThorns = baseEnemy.thorns + Math.floor(cycle / 2);
+  const scaledFury = baseEnemy.fury + Math.floor((cycle + 1) / 2);
+  const rawAttack = baseEnemy.attack + cycle * 4 + Math.floor((battleCount - 1) / 2) + (isBossBattle ? 6 : 1);
+  const rawHP = baseEnemy.maxHP + cycle * 28 + (battleCount - 1) * 4 + (isBossBattle ? 85 : 0);
+  const scaledAttack = Math.max(1, Math.round(rawAttack * gameProfile.enemyAttackScale));
+  maxEnemyHP = Math.max(40, Math.round(rawHP * gameProfile.enemyHpScale));
+  enemyHP = maxEnemyHP;
+  enemyAttack = scaledAttack;
+  currentEnemy = {
+    ...baseEnemy,
+    baseName: baseEnemy.name,
+    name: isBossBattle ? `${baseEnemy.name} Boss` : baseEnemy.name,
+    armor: scaledArmor,
+    thorns: scaledThorns + (isBossBattle ? 1 : 0),
+    fury: scaledFury + (isBossBattle ? 1 : 0),
+    attack: scaledAttack,
+    isBoss: isBossBattle,
+    phase: 1,
+    baseBonusText: baseEnemy.bonusText,
+    phaseText: cycle >= 2 ? "Escalating hunt" : "",
+    bonusText: `${baseEnemy.bonusText} Tier bonuses: +${scaledArmor - baseEnemy.armor} armor, +${scaledThorns - baseEnemy.thorns} thorns, +${scaledFury - baseEnemy.fury} fury.${isBossBattle ? " Boss traits: stronger attacks, relic reward, and heavier status pressure." : ""}`
+  };
+  enemyTurnCount = 0;
+  enemyWeaken = 0;
+  comboStreak = 0;
+  enemyStatus = { burn: 0, chill: 0 };
+  nextEnemyMove = planEnemyMove();
+  document.getElementById("enemyName").innerText = currentEnemy.name;
+  document.getElementById("enemyFlavor").innerText = `${currentEnemy.flavor} ${getCurrentBiome().flavor}`;
+  document.getElementById("enemyAttackText").innerText = `Enemy attack: ${enemyAttack}`;
+  document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+  updateIntentChip();
+  updateEnemyModel();
+  updateBiomeTheme();
+  document.getElementById("battleCount").innerText = battleCount;
+  renderEnemyStats();
+  if (!currentEnemy.isBoss && battleCount > 1 && (battleCount - 1) % 5 === 0) {
+    showPhaseBanner("Checkpoint", `Battle ${battleCount} begins. The climb is getting harsher.`, "phase");
+  }
+  if (currentEnemy.isBoss) {
+    pulseBossWarning();
+    showPhaseBanner("Boss Fight", `${currentEnemy.name} enters with ${nextEnemyMove.label}.`, "boss");
+  } else if (nextEnemyMove?.label === "Boss Cataclysm" || nextEnemyMove?.label === "Boss Guardbreak") {
+    pulseBossWarning();
+    showPhaseBanner("Boss Warning", `${currentEnemy.name} is preparing ${nextEnemyMove.label}.`, "boss");
+  }
+}
+
+function clampHealth() {
+  if (enemyHP < 0) enemyHP = 0;
+  if (enemyHP > maxEnemyHP) enemyHP = maxEnemyHP;
+  if (playerHP < 0) playerHP = 0;
+  if (playerHP > maxPlayerHP) playerHP = maxPlayerHP;
+}
+
+function updateHealthBars() {
+  const enemyPercent = (enemyHP / maxEnemyHP) * 100;
+  const playerPercent = (playerHP / maxPlayerHP) * 100;
+  document.getElementById("enemyHealth").style.width = `${enemyPercent}%`;
+  document.getElementById("enemyHPText").innerText = `HP: ${enemyHP} / ${maxEnemyHP}`;
+  document.getElementById("playerHealth").style.width = `${playerPercent}%`;
+  document.getElementById("playerHPText").innerText = `HP: ${playerHP} / ${maxPlayerHP}`;
+  renderPlayerStats();
+}
+
+function resetCard(hideHint = true) {
+  document.getElementById("playerCard").classList.remove("flip");
+  document.getElementById("answer").value = "";
+  updateTurnOrder("Your Turn -> Solve and cast");
+  if (hideHint) {
+    document.getElementById("hintPanel").style.display = "none";
+  }
+}
+
+function resetRun() {
+  level = 0;
+  score = 0;
+  currentAnswer = null;
+  currentQuestionData = null;
+  questionMisses = 0;
+  mathDifficulty = "normal";
+  currentSpellId = "spark";
+  spellLevels = { spark: 1 };
+  rewardChoices = [];
+  deathChoices = [];
+  milestoneChoices = [];
+  relicChoices = [];
+  ownedRelics = [];
+  battleCount = 1;
+  enemyIndex = 0;
+  enemyTurnCount = 0;
+  playerBarrier = 0;
+  enemyWeaken = 0;
+  currentStance = "burst";
+  comboStreak = 0;
+  currentTwist = null;
+  currentRuneTrial = null;
+  selectedRuneChoice = null;
+  nextEnemyMove = null;
+  gameLogEntries = ["A new run begins."];
+  gameLogPage = 0;
+  potionBonuses = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0 };
+  relicBonuses = { power: 0, ward: 0, focus: 0, vitality: 0, lifesteal: 0, barrier: 0, burnBoost: 0, bossWard: 0, combo: 0, crit: 0, cleanse: false };
+  playerStatus = { burn: 0, curse: 0, freeze: 0 };
+  enemyStatus = { burn: 0, chill: 0 };
+  currentEnemy = enemyRoster[0];
+  maxPlayerHP = basePlayerMaxHP + getPlayerStats().vitality;
+  playerHP = maxPlayerHP;
+  maxEnemyHP = currentEnemy.maxHP;
+  enemyHP = maxEnemyHP;
+  enemyAttack = currentEnemy.attack;
+  updateTurnOrder("Your Turn -> Solve and cast");
+  if (embedEnemyConfig) {
+    currentEnemy = { ...embedEnemyConfig, baseName: embedEnemyConfig.name, isBoss: false, phase: 1, baseBonusText: embedEnemyConfig.bonusText };
+    maxEnemyHP = currentEnemy.maxHP;
+    enemyHP = maxEnemyHP;
+    enemyAttack = currentEnemy.attack;
+    enemyTurnCount = 0;
+    enemyWeaken = 0;
+    nextEnemyMove = planEnemyMove();
+    document.getElementById("enemyName").innerText = currentEnemy.name;
+    document.getElementById("enemyFlavor").innerText = currentEnemy.flavor;
+    document.getElementById("enemyAttackText").innerText = `Enemy attack: ${enemyAttack}`;
+    document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+  } else {
+    loadNextEnemy();
+  }
+
+  document.getElementById("level").innerText = "-";
+  document.getElementById("mathMode").innerText = "Normal";
+  document.getElementById("battleCount").innerText = "1";
+  document.getElementById("score").innerText = "0";
+  document.getElementById("rewardPanel").classList.remove("show");
+  document.getElementById("deathPanel").classList.remove("show");
+  document.getElementById("milestonePanel").classList.remove("show");
+  document.getElementById("relicPanel").classList.remove("show");
+  if (embedMode) {
+    document.querySelector(".subtitle").innerText = "Areen Final Math encounter mode. Dark fantasy spell duels with bosses, relics, evolved spells, and biome shifts.";
+  }
+
+  renderEnemyStats();
+  renderSpellBook();
+  renderRelics();
+  renderGameLog();
+updateMathDifficultyButtons();
+updateGameDifficultyButtons();
+  updateStanceButtons();
+  updateBiomeTheme();
+  resetCard();
+  updateHealthBars();
+  generateQuestion();
+  setStatus(embedMode ? "Pick a level and solve to cast." : "Areen Final Math: pick your settings, choose a level, and start the duel.");
+  setCombatFeed("The duel is ready.");
+}
+
+function setStatus(message) {
+  document.getElementById("statusText").innerText = message;
+}
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+document.getElementById("answer").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    submitAnswer();
+  }
+});
+
+document.addEventListener("keydown", handleDevShortcut);
+document.getElementById("tutorialNext").addEventListener("click", nextTutorialStep);
+document.getElementById("tutorialSkip").addEventListener("click", () => closeTutorial(true));
+
+resetRun();
+if (!embedMode && localStorage.getItem("enzo4-tutorial-seen") !== "1") {
+  openTutorial();
+}
+</script>
+</body>
+</html>
