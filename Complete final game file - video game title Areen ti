@@ -865,7 +865,7 @@ c.fillStyle=&#39;#a8d8ea&#39;;c.fill();c.restore();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Enzo 2 - Full Systems Build</title>
+<title>Areen v3 - Full Systems Build</title>
 <style>
 :root {
   --bg-night: #08111f;
@@ -928,8 +928,8 @@ body::before {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .settings-panel {
@@ -1012,6 +1012,11 @@ body::before {
   text-transform: uppercase;
   border-radius: 0;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22);
+}
+
+.settings-toggle.pause-toggle {
+  background: linear-gradient(180deg, #6a3d12, #4b250d);
+  border-color: #b1783e;
 }
 
 .collection-panel {
@@ -1322,6 +1327,18 @@ input {
   opacity: 0.95;
 }
 
+.reward-keyword {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background: rgba(240, 210, 154, 0.1);
+  border: 2px solid rgba(240, 210, 154, 0.34);
+  color: #f0d29a;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .status {
   min-height: 24px;
   margin-top: 16px;
@@ -1337,6 +1354,74 @@ input {
   font-weight: bold;
   letter-spacing: 0.02em;
   opacity: 0.88;
+}
+
+.turn-order {
+  min-height: 18px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: #d5b27a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.intent-chip {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 3px 8px;
+  border: 2px solid #7e4a1d;
+  background: rgba(58, 27, 12, 0.92);
+  color: #f1e7d7;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.intent-chip.attack { border-color: #c96a36; color: #ffcfb0; }
+.intent-chip.guard { border-color: #d0b15a; color: #fff0b3; }
+.intent-chip.curse { border-color: #8e67c7; color: #e2d1ff; }
+.intent-chip.charge { border-color: #d24646; color: #ffd4d4; }
+
+.pause-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 430;
+  background: rgba(8, 5, 4, 0.84);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pause-panel.show {
+  display: flex;
+}
+
+.pause-card {
+  width: min(440px, 100%);
+  background: linear-gradient(180deg, rgba(36, 20, 12, 0.98), rgba(18, 11, 8, 0.98));
+  border: 3px solid #a56c2f;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.28);
+  padding: 18px;
+  text-align: center;
+}
+
+.pause-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.pause-actions button {
+  padding: 10px 14px;
+  background: #6a3d12;
+  border: 3px solid #a56c2f;
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
 }
 
 .game-log {
@@ -1403,17 +1488,71 @@ input {
 
 .reward-panel {
   display: none;
-  margin: 28px auto 0;
-  padding: 18px;
-  max-width: 980px;
-  background: linear-gradient(180deg, rgba(12, 20, 36, 0.97), rgba(7, 12, 23, 0.95));
-  border: 2px solid rgba(168, 216, 234, 0.24);
-  border-radius: 18px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+  position: fixed;
+  inset: 0;
+  z-index: 420;
+  padding: 22px 18px;
+  background: rgba(8, 5, 4, 0.82);
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
 }
 
 .reward-panel.show {
-  display: block;
+  display: flex;
+}
+
+.reward-panel > * {
+  pointer-events: auto;
+}
+
+.reward-panel h2,
+.reward-panel > p,
+.reward-panel .reward-grid {
+  width: min(980px, calc(100vw - 36px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.reward-panel h2,
+.reward-panel > p {
+  max-width: 980px;
+}
+
+.reward-panel::before {
+  content: "";
+  position: absolute;
+  width: min(980px, calc(100vw - 36px));
+  max-height: min(82vh, 760px);
+  height: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(180deg, rgba(36, 20, 12, 0.98), rgba(18, 11, 8, 0.98));
+  border: 3px solid #a56c2f;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.28);
+  z-index: -1;
+}
+
+.reward-panel {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reward-panel .reward-grid {
+  max-height: min(56vh, 520px);
+  overflow: auto;
+  padding: 6px;
+}
+
+.reward-panel h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.reward-panel > p {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .tutorial-launch {
@@ -1530,20 +1669,22 @@ body::before {
 .screen {
   max-width: 1360px;
   min-height: 100vh;
-  padding: 18px 22px 132px;
+  height: 100vh;
+  padding: 10px 16px 18px;
+  overflow: hidden;
 }
 
 h1 {
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   letter-spacing: 0.18em;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .subtitle {
   max-width: 920px;
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   opacity: 0.82;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .tutorial-launch {
@@ -1566,21 +1707,21 @@ h1 {
 
 #mathDifficultyButtons {
   justify-content: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 #levelButtons {
   position: static;
-  margin: 0 auto 12px;
+  margin: 0 auto 8px;
   z-index: auto;
-  gap: 6px;
+  gap: 5px;
   justify-content: center;
 }
 
 #levelButtons button {
-  min-width: 46px;
-  min-height: 46px;
-  font-size: 1.2rem;
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1rem;
   padding: 0;
   background: #7d5628;
   border: 4px solid #5d3514;
@@ -1594,13 +1735,14 @@ h1 {
 
 .buttons {
   justify-content: flex-start;
+  gap: 8px;
 }
 
 .game-area {
-  grid-template-columns: 228px minmax(360px, 1fr) 248px;
-  gap: 24px;
+  grid-template-columns: 212px minmax(320px, 1fr) 224px;
+  gap: 14px;
   align-items: start;
-  margin-top: 12px;
+  margin-top: 6px;
 }
 
 #playerPanel,
@@ -1628,8 +1770,8 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 12px;
-  padding: 8px 12px;
+  margin-top: 8px;
+  padding: 7px 10px;
   background: #6a3d12;
   border: 3px solid #a56c2f;
   color: #e9f2ff;
@@ -1642,7 +1784,7 @@ h1 {
 
 .stats-wrap {
   display: none;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .stats-wrap.open {
@@ -1651,8 +1793,8 @@ h1 {
 
 .card-container {
   margin-top: 0;
-  width: min(100%, 228px);
-  height: 286px;
+  width: min(100%, 206px);
+  height: 258px;
   margin-left: auto;
   margin-right: auto;
   position: relative;
@@ -1696,9 +1838,9 @@ h1 {
 }
 
 .card-face {
-  inset: 18px;
+  inset: 16px;
   border-radius: 0;
-  padding: 14px 14px 12px;
+  padding: 12px 12px 10px;
   justify-content: flex-start;
 }
 
@@ -1762,7 +1904,7 @@ input::placeholder {
 
 .selected-card-art {
   min-height: 0;
-  padding: 10px 10px 8px;
+  padding: 8px 8px 6px;
   background: rgba(228, 212, 176, 0.16);
   border: 3px solid #7b4a1f;
   box-shadow:
@@ -1772,7 +1914,7 @@ input::placeholder {
 
 .selected-card-copy {
   min-height: 0;
-  padding: 8px 9px 7px;
+  padding: 7px 8px 6px;
   background: linear-gradient(180deg, rgba(97, 55, 20, 0.96), rgba(59, 28, 9, 0.96));
   border: 3px solid #7b3c10;
   border-top: 0;
@@ -1786,7 +1928,7 @@ input::placeholder {
 }
 
 .selected-card-name {
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   line-height: 1.15;
   color: #fff4dd;
   text-transform: uppercase;
@@ -1800,35 +1942,35 @@ input::placeholder {
   padding: 3px 6px;
   background: #3a1b0c;
   border: 2px solid #9a6a31;
-  font-size: 0.6rem;
+  font-size: 0.54rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #f3cf8e;
 }
 
 .selected-card-text {
-  font-size: 0.72rem;
-  line-height: 1.35;
+  font-size: 0.64rem;
+  line-height: 1.28;
   overflow: hidden;
   color: #f1e7d7;
 }
 
 .selected-card-rules {
   display: block;
-  font-size: 0.7rem;
-  line-height: 1.28;
+  font-size: 0.62rem;
+  line-height: 1.18;
   color: #d6c8b1;
 }
 
 .card-popup-trigger {
-  margin-top: 8px;
-  width: min(100%, 250px);
-  padding: 8px 10px;
+  margin-top: 6px;
+  width: min(100%, 220px);
+  padding: 7px 8px;
   background: #6a3d12;
   border: 3px solid #a56c2f;
   color: #e9f2ff;
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -1951,10 +2093,10 @@ input::placeholder {
 
 .info {
   width: min(100%, 440px);
-  margin: 12px auto 0;
+  margin: 8px auto 0;
   text-align: left;
   color: #d9d9d9;
-  font-size: 0.95rem;
+  font-size: 0.82rem;
 }
 
 .info br:nth-of-type(-n+3) {
@@ -1963,7 +2105,7 @@ input::placeholder {
 
 #playerHPText,
 #enemyHPText {
-  font-size: 1rem;
+  font-size: 0.88rem;
   letter-spacing: 0.06em;
   color: #d8d8d8;
 }
@@ -1971,7 +2113,7 @@ input::placeholder {
 .health-bar {
   border: none;
   background: transparent;
-  height: 18px;
+  height: 14px;
   border-radius: 0;
   overflow: visible;
   position: relative;
@@ -2017,7 +2159,7 @@ input::placeholder {
 .duel-panel {
   align-self: center;
   width: 100%;
-  max-width: 460px;
+  max-width: 420px;
   justify-self: center;
 }
 
@@ -2025,8 +2167,8 @@ input::placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-top: 156px;
+  gap: 8px;
+  margin-top: 66px;
 }
 
 .rune-panel {
@@ -2097,13 +2239,13 @@ input::placeholder {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 6px;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .stance-button {
-  min-height: 68px;
-  padding: 8px 10px;
+  min-height: 56px;
+  padding: 6px 8px;
   border: 3px solid #7e4a1d;
   background: #3f1c0d;
   color: #d8d8d8;
@@ -2116,14 +2258,14 @@ input::placeholder {
 
 .stance-button strong {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
 }
 
 .stance-button span {
   display: block;
-  margin-top: 4px;
-  font-size: 0.58rem;
-  line-height: 1.35;
+  margin-top: 2px;
+  font-size: 0.5rem;
+  line-height: 1.2;
   color: rgba(216,216,216,0.72);
 }
 
@@ -2138,13 +2280,14 @@ input::placeholder {
   width: 100%;
   text-align: center;
   color: #cda56f;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .duel-panel .question {
   max-width: 420px;
+  margin: 10px 0 8px;
 }
 
 .duel-panel .cast-button {
@@ -2152,8 +2295,8 @@ input::placeholder {
   border: none;
   box-shadow: none;
   color: rgba(216,216,216,0.5);
-  font-size: 1.15rem;
-  padding: 6px 0;
+  font-size: 1rem;
+  padding: 4px 0;
   font-family: inherit;
 }
 
@@ -2168,9 +2311,9 @@ input::placeholder {
 
 .enemy-stage {
   position: relative;
-  width: 240px;
-  height: 320px;
-  margin: 28px auto 10px;
+  width: 208px;
+  height: 258px;
+  margin: 10px auto 8px;
   image-rendering: pixelated;
   filter: drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.26));
 }
@@ -2203,8 +2346,8 @@ input::placeholder {
   position: absolute;
   left: 50%;
   bottom: 18px;
-  width: 150px;
-  height: 70px;
+  width: 128px;
+  height: 54px;
   transform: translateX(-50%);
   background: #363636;
   border-radius: 50%;
@@ -2214,8 +2357,8 @@ input::placeholder {
   position: absolute;
   left: 50%;
   bottom: 50px;
-  width: 94px;
-  height: 184px;
+  width: 82px;
+  height: 160px;
   transform: translateX(-50%);
   image-rendering: pixelated;
   filter: saturate(0.98) contrast(1.08) drop-shadow(4px 4px 0 rgba(0,0,0,0.34));
@@ -2854,6 +2997,20 @@ input::placeholder {
   letter-spacing: 0.08em;
 }
 
+.level-requirement {
+  display: inline-block;
+  margin: 4px 0 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(232, 201, 106, 0.18);
+  border: 1px solid rgba(232, 201, 106, 0.45);
+  color: #f6d98d;
+  font-size: 0.78rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .card-meta {
   color: rgba(233,242,255,0.74);
 }
@@ -2952,14 +3109,14 @@ input::placeholder {
 </head>
 <body>
 <div class="screen">
-  <h1>Enzo 2</h1>
+  <h1>Areen</h1>
   <p class="subtitle">
-    Full systems build. Dark fantasy pixel duels with bosses, relics, evolved spells, biome shifts, and a deeper spellcasting loop.
-  </p>
+     </p>
   <div class="top-bar">
     <button class="settings-toggle" type="button" id="settingsToggle" onclick="toggleSettings()">Open Settings</button>
     <button class="settings-toggle" type="button" id="collectionToggle" onclick="toggleCollection()">Open Cards & Relics</button>
-    <button class="settings-toggle" type="button" id="devToggle" onclick="toggleDevPanel()">Open Dev</button>
+    <button class="settings-toggle" type="button" id="devToggle" onclick="toggleDevPanel()" hidden aria-hidden="true">Open Dev</button>
+    <button class="settings-toggle pause-toggle" type="button" id="pauseToggle" onclick="togglePauseMenu()">Menu</button>
     <button class="settings-toggle" type="button" onclick="openTutorial(true)">How To Play</button>
   </div>
   <section class="settings-panel" id="settingsPanel">
@@ -3033,9 +3190,7 @@ input::placeholder {
               </div>
             </div>
           </div>
-          <div class="card-face back">
-            <h3 id="result">Your magic gathers...</h3>
-          </div>
+          <div class="card-face back"></div>
         </div>
       </div>
       <button class="card-popup-trigger" type="button" onclick="openCardPopup()">Card Details</button>
@@ -3050,6 +3205,7 @@ input::placeholder {
         Level: <span id="level">-</span><br>
         Battle: <span id="battleCount">1</span>
       </div>
+      <div class="turn-order" id="turnOrder">Your Turn -> Solve and cast</div>
       <p class="status" id="statusText">Solve the math and cast.</p>
       <div class="combat-feed" id="combatFeed">The duel is ready.</div>
       <div class="game-log">
@@ -3097,7 +3253,7 @@ input::placeholder {
         </div>
         <div class="stance-readout" id="stanceReadout">Ritual Stance: Burst | Combo 0</div>
         <input id="answer" type="number" placeholder="Answer">
-        <button class="cast-button" onclick="submitAnswer()">Cast Spell</button>
+        <button class="cast-button" id="castSpellButton" onclick="submitAnswer()">Cast Spell</button>
         <button class="cast-button" onclick="toggleHint()">Hint / Steps</button>
         <p class="hint ui-hidden">Selected spell damage: <span id="spellDamage">0</span></p>
         <div class="stat-list" id="hintPanel" style="display: none; margin-top: 10px;"></div>
@@ -3136,6 +3292,7 @@ input::placeholder {
       </div>
       <div class="health-bar"><div class="health-fill" id="enemyHealth"></div></div>
       <div id="enemyHPText">HP: 150 / 150</div>
+      <div id="enemyIntentChip" class="intent-chip attack">Attack</div>
       <div id="enemyIntentText" class="hint">Intent: Testing strike</div>
       <div id="enemyAttackText" class="hint ui-hidden">Enemy attack: 10</div>
     </div>
@@ -3187,6 +3344,18 @@ input::placeholder {
 <div class="attack-banner" id="attackBanner">
   <strong id="attackBannerTitle">Enemy Attack</strong>
   <span id="attackBannerText">The foe is about to strike.</span>
+</div>
+
+<div class="pause-panel" id="pausePanel">
+  <div class="pause-card">
+    <h2>Pause Menu</h2>
+    <p class="hint">Take a breath, review the game, or restart this run.</p>
+    <div class="pause-actions">
+      <button type="button" onclick="togglePauseMenu()">Resume</button>
+      <button type="button" onclick="openTutorial(true); togglePauseMenu(false);">How To Play</button>
+      <button type="button" onclick="togglePauseMenu(false); resetRun();">Restart Run</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay-panel" id="spellbookPopup">
@@ -3243,7 +3412,7 @@ const spellPool = [
   { id: "nova", name: "Sun Nova", rarity: "Epic", minLevel: 4, baseDamage: 14, crit: 10, lifesteal: 0, vitality: 0, power: 3, ward: 0, focus: 2, text: "A bright blast that breaks armor and hits hard." },
   { id: "aegis", name: "Aegis Rune", rarity: "Epic", minLevel: 3, baseDamage: 6, crit: 3, lifesteal: 0, vitality: 16, power: 0, ward: 4, focus: 0, text: "A shield rune that stacks thick barrier and health." },
   { id: "void", name: "Void Lantern", rarity: "Epic", minLevel: 4, baseDamage: 11, crit: 12, lifesteal: 9, vitality: 4, power: 2, ward: 0, focus: 3, text: "Dark light that steals life when it lands." },
-  { id: "meteor", name: "Meteor Crown", rarity: "Legendary", minLevel: 5, baseDamage: 18, crit: 14, lifesteal: 0, vitality: 0, power: 4, ward: 0, focus: 3, text: "A falling-star strike that punishes healthy enemies." },
+  { id: "meteor", name: "Meteor Crown", rarity: "Legendary", minLevel: 4, baseDamage: 18, crit: 14, lifesteal: 0, vitality: 0, power: 4, ward: 0, focus: 3, text: "A falling-star strike that punishes healthy enemies." },
   { id: "oracle", name: "Oracle Glass", rarity: "Legendary", minLevel: 4, baseDamage: 9, crit: 18, lifesteal: 14, vitality: 16, power: 1, ward: 1, focus: 4, text: "A moonlit lens that boosts crits and healing." }
 ];
 
@@ -3309,6 +3478,9 @@ let currentRuneTrial = null;
 let selectedRuneChoice = null;
 let nextEnemyMove = null;
 let tutorialStep = 0;
+let turnLocked = false;
+let devShortcutPresses = [];
+let devShortcutUnlocked = false;
 let phaseBannerTimer = null;
 let attackBannerTimer = null;
 let audioContext = null;
@@ -3461,12 +3633,12 @@ function updateMathDifficultyButtons() {
 
 function getGameProfile() {
   if (gameDifficulty === "easy") {
-    return { label: "Easy", enemyHpScale: 0.84, enemyAttackScale: 0.86, protection: 1.12 };
+    return { label: "Easy", enemyHpScale: 0.84, enemyAttackScale: 0.98, protection: 1.12 };
   }
   if (gameDifficulty === "hard") {
-    return { label: "Hard", enemyHpScale: 1.2, enemyAttackScale: 1.16, protection: 0.9 };
+    return { label: "Hard", enemyHpScale: 1.2, enemyAttackScale: 1.32, protection: 0.9 };
   }
-  return { label: "Normal", enemyHpScale: 1, enemyAttackScale: 1, protection: 1 };
+  return { label: "Normal", enemyHpScale: 1, enemyAttackScale: 1.14, protection: 1 };
 }
 
 function updateGameDifficultyButtons() {
@@ -3845,6 +4017,15 @@ function closeCardPopup() {
   document.getElementById("cardPopup").classList.remove("show");
 }
 
+function togglePauseMenu(forceOpen = null) {
+  const panel = document.getElementById("pausePanel");
+  const button = document.getElementById("pauseToggle");
+  if (!panel || !button) return;
+  const opening = forceOpen === null ? !panel.classList.contains("show") : forceOpen;
+  panel.classList.toggle("show", opening);
+  button.innerText = opening ? "Close Menu" : "Menu";
+}
+
 function toggleSettings() {
   const panel = document.getElementById("settingsPanel");
   const button = document.getElementById("settingsToggle");
@@ -3863,13 +4044,55 @@ function toggleCollection() {
   button.innerText = opening ? "Hide Cards & Relics" : "Open Cards & Relics";
 }
 
-function toggleDevPanel() {
+function setDevPanelOpen(opening, revealButton = false) {
   const panel = document.getElementById("devPanel");
   const button = document.getElementById("devToggle");
   if (!panel || !button) return;
-  const opening = !panel.classList.contains("open");
   panel.classList.toggle("open", opening);
+  button.hidden = !revealButton && !opening;
+  button.setAttribute("aria-hidden", button.hidden ? "true" : "false");
   button.innerText = opening ? "Close Dev" : "Open Dev";
+}
+
+function toggleDevPanel() {
+  if (!devShortcutUnlocked) return;
+  const panel = document.getElementById("devPanel");
+  if (!panel) return;
+  const opening = !panel.classList.contains("open");
+  setDevPanelOpen(opening, opening);
+  if (!opening) {
+    devShortcutUnlocked = false;
+  }
+}
+
+function handleDevShortcut(event) {
+  if (embedMode || event.key !== "Backspace" || event.repeat) {
+    return;
+  }
+
+  const target = event.target;
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target?.isContentEditable
+  ) {
+    return;
+  }
+
+  const now = Date.now();
+  devShortcutPresses = devShortcutPresses.filter((timestamp) => now - timestamp <= 1400);
+  devShortcutPresses.push(now);
+
+  if (devShortcutPresses.length < 5) {
+    return;
+  }
+
+  devShortcutPresses = [];
+  devShortcutUnlocked = true;
+  setDevPanelOpen(true, true);
+  setStatus("Dev panel unlocked.");
+  setCombatFeed("Hidden dev shortcut accepted.");
 }
 
 function closeProgressPanels() {
@@ -4288,11 +4511,12 @@ function calculateEnemyAttack() {
   const stance = getStanceConfig();
   const move = nextEnemyMove || planEnemyMove();
   let raw = move.damage + rand(0, move.swing);
+  raw += 2;
   if (enemyTurnCount >= 3) {
-    raw += Math.min(4, Math.floor(enemyTurnCount / 2));
+    raw += Math.min(6, Math.floor(enemyTurnCount / 2) + 1);
   }
   if (currentEnemy.phase >= 2) {
-    raw += 1;
+    raw += 2;
   }
   raw = Math.max(1, raw - enemyWeaken - enemyStatus.chill);
   let reduced = Math.max(0, raw - stats.ward - stance.wardBonus - playerBarrier);
@@ -4322,6 +4546,89 @@ function getEnemyIntentText() {
   if (currentEnemy.fury >= 2) return "Intent: Wild burst";
   if (currentEnemy.armor >= 3) return "Intent: Heavy guard";
   return "Intent: Pressing attack";
+}
+
+function updateTurnOrder(text = "Your Turn -> Solve and cast") {
+  const node = document.getElementById("turnOrder");
+  if (node) node.innerText = text;
+}
+
+function setTurnInteractionLocked(locked, statusMessage = "") {
+  turnLocked = locked;
+  const answer = document.getElementById("answer");
+  const castButton = document.getElementById("castSpellButton");
+  if (answer) answer.disabled = locked;
+  if (castButton) castButton.disabled = locked;
+  if (locked && statusMessage) {
+    setStatus(statusMessage);
+  }
+}
+
+function runEnemyAttackPhase(counterAttack, priorText, answeredCorrectly, stance) {
+  updateTurnOrder(`Enemy Phase -> ${counterAttack.move.label}`);
+  setTurnInteractionLocked(true, `Enemy phase: ${counterAttack.move.label}`);
+  setCombatFeed(`${currentEnemy.name} gathers strength for ${counterAttack.move.label}.`);
+  showAttackBanner("Enemy Phase", `${counterAttack.move.label} is coming.`);
+
+  setTimeout(() => {
+    playerHP -= Math.max(0, counterAttack.damage - (currentEnemy.isBoss ? relicBonuses.bossWard : 0));
+    playerBarrier = Math.max(0, playerBarrier - counterAttack.blocked);
+    enemyWeaken = 0;
+    enemyStatus.chill = Math.max(0, enemyStatus.chill - 1);
+    enemyTurnCount += 1;
+    animateElementClass(".enemy-sprite", "attack", 560);
+    if (counterAttack.damage > 0) {
+      showFloatingText("playerFloaters", `-${counterAttack.damage}`, "damage");
+      playRetroTone("miss");
+    }
+    if (counterAttack.blocked > 0) {
+      showFloatingText("playerFloaters", `Block ${counterAttack.blocked}`, "buff");
+    }
+    counterAttack.move.apply();
+    clampHealth();
+    updateHealthBars();
+    if (counterAttack.damage > 0) {
+      pulsePanel("playerPanel", "hit-panel");
+    }
+    if ((currentEnemy.fury >= 3 || currentEnemy.isBoss) && enemyTurnCount >= 2 && playerHP > 0) {
+      const followUpDamage = Math.max(1, Math.round(Math.max(1, enemyAttack - getPlayerStats().ward) * 0.45));
+      playerHP -= followUpDamage;
+      showFloatingText("playerFloaters", `-${followUpDamage}`, "damage");
+      priorText += ` Follow-up strike hits for ${followUpDamage}.`;
+      clampHealth();
+      updateHealthBars();
+    }
+    setCombatFeed(
+      counterAttack.blocked > 0
+        ? `${counterAttack.move.label} slams in, but your barrier blocks ${counterAttack.blocked}.`
+        : `${counterAttack.move.label} connects. ${stance.name} stance holds the line.`
+    );
+    nextEnemyMove = planEnemyMove();
+    document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+    updateIntentChip();
+    if (currentEnemy.isBoss && (nextEnemyMove.label === "Boss Cataclysm" || nextEnemyMove.label === "Boss Guardbreak")) {
+      pulseBossWarning();
+      showPhaseBanner("Boss Warning", `${currentEnemy.name} is preparing ${nextEnemyMove.label}.`, "boss");
+    }
+    renderEnemyStats();
+
+    if (playerHP === 0) {
+      setTimeout(() => {
+        handleDefeat();
+      }, 240);
+      return;
+    }
+
+    setTimeout(() => {
+      resetCard(answeredCorrectly);
+      setTurnInteractionLocked(false);
+      if (answeredCorrectly) {
+        generateQuestion();
+      } else {
+        updateHintPanel();
+      }
+    }, 700);
+  }, 900);
 }
 
 function updateEnemyModel() {
@@ -4652,14 +4959,42 @@ function renderEnemyStats() {
   `;
 }
 
+function getRewardKeyword(item) {
+  if (item.type === "potion") return "Recovery";
+  if (item.type === "relic") return "Relic";
+  if ((item.thorns || 0) > 0) return "Thorns";
+  if ((item.ward || 0) >= (item.power || 0) + 1) return "Defense";
+  if ((item.lifesteal || 0) >= 2) return "Recovery";
+  if ((item.crit || 0) >= 5) return "Crit";
+  return "Damage";
+}
+
+function getIntentKind() {
+  const label = nextEnemyMove?.label || "";
+  if (/curse|hex|omen|ink/i.test(label)) return "curse";
+  if (/guard|bulwark|shield|stance|wall/i.test(label)) return "guard";
+  if (/cataclysm|charge|inferno|storm|flurry/i.test(label)) return "charge";
+  return "attack";
+}
+
+function updateIntentChip() {
+  const chip = document.getElementById("enemyIntentChip");
+  if (!chip) return;
+  const kind = getIntentKind();
+  chip.className = `intent-chip ${kind}`;
+  chip.innerText = kind === "guard" ? "Guard" : kind === "curse" ? "Curse" : kind === "charge" ? "Charge" : "Attack";
+}
+
 function formatSpellCard(spell) {
   const shared = getSharedSpellStats(spell);
   return `
     <span class="card-rarity">${spell.rarity}</span>
     <span class="card-title">${spell.name} Lv.${spell.spellLevel}</span>
+    <span class="level-requirement">Requires Level ${spell.minLevel}</span>
+    <span class="reward-keyword">${getRewardKeyword(spell)}</span>
     ${getSpellArtMarkup(spell, "small")}
     <span class="card-meta">${spell.evolutionTier === 2 ? "Ascended" : spell.evolutionTier === 1 ? "Awakened" : "Base Form"}</span>
-    <span class="card-meta">Level ${spell.minLevel}+ | ${formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" })}</span>
+    <span class="card-meta">${formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" })}</span>
     <span class="card-copy">${spell.text}</span>
     <span class="card-meta">${getSpellEffectText(spell)}</span>
   `;
@@ -4669,6 +5004,7 @@ function formatRelicCard(relic) {
   return `
     <span class="card-rarity">Relic</span>
     <span class="card-title">${relic.name}</span>
+    <span class="reward-keyword">Relic</span>
     <span class="card-meta">${relic.line1}</span>
     <span class="card-meta">${relic.line2}</span>
     <span class="card-meta">${relic.text}</span>
@@ -4688,6 +5024,7 @@ function formatPotionCard(potion) {
   return `
     <span class="card-rarity">${potion.rarity}</span>
     <span class="card-title">${potion.name}</span>
+    <span class="reward-keyword">${getRewardKeyword(potion)}</span>
     <span class="card-meta">Restore ${potion.health} HP immediately</span>
     <span class="card-meta">${formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" })}</span>
     <span class="card-meta">${potion.text}</span>
@@ -4698,6 +5035,7 @@ function formatDeathBlessing(choice) {
   return `
     <span class="card-rarity">Blessing</span>
     <span class="card-title">${choice.name}</span>
+    <span class="reward-keyword">Growth</span>
     <span class="card-meta">${choice.line1}</span>
     <span class="card-meta">${choice.line2}</span>
     <span class="card-meta">${choice.text}</span>
@@ -4903,7 +5241,7 @@ function updateSelectedSpell() {
   document.getElementById("selectedCardTag").innerText = `Drawn ${spell.rarity} Lv.${spell.spellLevel} ${spell.evolutionTier === 2 ? "Ascended" : spell.evolutionTier === 1 ? "Awakened" : "Spell"}`;
   document.getElementById("selectedCardName").innerText = spell.name;
   document.getElementById("selectedCardText").innerText = getBattleCardText(spell.text);
-  document.getElementById("selectedCardRules").innerText = formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" });
+  document.getElementById("selectedCardRules").innerText = `Requires Level ${spell.minLevel} | ${formatSharedStatsInline(shared, { valuePrefix: "+", critSuffix: "%", recoverySuffix: "%" })}`;
   document.getElementById("selectedCardArt").innerHTML = getSpellArtMarkup(spell, "large");
   document.getElementById("spellDamage").innerText = preview;
   updateStanceButtons();
@@ -5098,6 +5436,11 @@ function generateQuestion() {
 }
 
 function submitAnswer() {
+  if (turnLocked) {
+    setStatus("Wait for the enemy phase to finish.");
+    return;
+  }
+
   if (rewardChoices.length > 0 || deathChoices.length > 0 || milestoneChoices.length > 0 || relicChoices.length > 0) {
     setStatus("Choose your pending reward, blessing, or milestone boon before continuing.");
     return;
@@ -5144,8 +5487,8 @@ function submitAnswer() {
     playRetroTone(attackRoll.crit ? "phase" : "hit");
     score += attackRoll.value + Math.floor((battleCount - 1) / enemyRoster.length) * 5 + comboStreak;
     text = attackRoll.crit
-      ? `Critical hit for ${attackRoll.value} damage.`
-      : `Hit landed for ${attackRoll.value} damage.`;
+      ? `Crit ${attackRoll.value}`
+      : `Hit ${attackRoll.value}`;
     text += ` ${attackRoll.stanceName} stance adds ${attackRoll.comboBonus} combo damage.`;
 
     if (stats.lifesteal + attackRoll.extraLifesteal > 0) {
@@ -5225,7 +5568,7 @@ function submitAnswer() {
     const hintPanel = document.getElementById("hintPanel");
     hintPanel.style.display = "block";
     hintPanel.innerHTML = buildHintMarkup();
-    text = `Spell reflected for ${reflected} damage.`;
+    text = `Reflect ${reflected}`;
     if (battleCount <= 2) {
       text += " Early-battle protection softens the blow.";
     }
@@ -5243,8 +5586,6 @@ function submitAnswer() {
   clampHealth();
   updateHealthBars();
   document.getElementById("score").innerText = score;
-  document.getElementById("result").innerText = text;
-  document.getElementById("playerCard").classList.add("flip");
 
   if (enemyHP === 0) {
     if (embedMode) {
@@ -5275,65 +5616,7 @@ function submitAnswer() {
   }
 
   const counterAttack = calculateEnemyAttack();
-  showAttackBanner("Enemy Turn", `${counterAttack.move.label} is coming.`);
-  setTimeout(() => {
-    playerHP -= Math.max(0, counterAttack.damage - (currentEnemy.isBoss ? relicBonuses.bossWard : 0));
-    playerBarrier = Math.max(0, playerBarrier - counterAttack.blocked);
-    enemyWeaken = 0;
-    enemyStatus.chill = Math.max(0, enemyStatus.chill - 1);
-    enemyTurnCount += 1;
-    animateElementClass(".enemy-sprite", "attack", 560);
-    if (counterAttack.damage > 0) {
-      showFloatingText("playerFloaters", `-${counterAttack.damage}`, "damage");
-      playRetroTone("miss");
-    }
-    if (counterAttack.blocked > 0) {
-      showFloatingText("playerFloaters", `Block ${counterAttack.blocked}`, "buff");
-    }
-    counterAttack.move.apply();
-    clampHealth();
-    updateHealthBars();
-    document.getElementById("result").innerText = `${text} ${counterAttack.move.label} hits for ${Math.max(0, counterAttack.damage - (currentEnemy.isBoss ? relicBonuses.bossWard : 0))}.`;
-    if (counterAttack.damage > 0) {
-      pulsePanel("playerPanel", "hit-panel");
-    }
-    if ((currentEnemy.fury >= 3 || currentEnemy.isBoss) && enemyTurnCount >= 2 && playerHP > 0) {
-      const followUpDamage = Math.max(1, Math.round(Math.max(1, enemyAttack - getPlayerStats().ward) * 0.45));
-      playerHP -= followUpDamage;
-      showFloatingText("playerFloaters", `-${followUpDamage}`, "damage");
-      text += ` Follow-up strike hits for ${followUpDamage}.`;
-      clampHealth();
-      updateHealthBars();
-    }
-    setCombatFeed(
-      counterAttack.blocked > 0
-        ? `${counterAttack.move.label} slams in, but your barrier blocks ${counterAttack.blocked}.`
-        : `${counterAttack.move.label} connects. ${stance.name} stance holds the line.`
-    );
-    nextEnemyMove = planEnemyMove();
-    document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
-  if (currentEnemy.isBoss && (nextEnemyMove.label === "Boss Cataclysm" || nextEnemyMove.label === "Boss Guardbreak")) {
-    pulseBossWarning();
-    showPhaseBanner("Boss Warning", `${currentEnemy.name} is preparing ${nextEnemyMove.label}.`, "boss");
-  }
-    renderEnemyStats();
-
-    if (playerHP === 0) {
-      setTimeout(() => {
-        handleDefeat();
-      }, 240);
-      return;
-    }
-
-    setTimeout(() => {
-      resetCard(answeredCorrectly);
-      if (answeredCorrectly) {
-        generateQuestion();
-      } else {
-        updateHintPanel();
-      }
-    }, 700);
-  }, 500);
+  runEnemyAttackPhase(counterAttack, text, answeredCorrectly, stance);
 }
 
 function handleDefeat() {
@@ -5537,7 +5820,7 @@ function loadNextEnemy() {
   const scaledArmor = baseEnemy.armor + Math.floor(cycle / 1.5);
   const scaledThorns = baseEnemy.thorns + Math.floor(cycle / 2);
   const scaledFury = baseEnemy.fury + Math.floor((cycle + 1) / 2);
-  const rawAttack = baseEnemy.attack + cycle * 3 + Math.floor((battleCount - 1) / 3) + (isBossBattle ? 4 : 0);
+  const rawAttack = baseEnemy.attack + cycle * 4 + Math.floor((battleCount - 1) / 2) + (isBossBattle ? 6 : 1);
   const rawHP = baseEnemy.maxHP + cycle * 28 + (battleCount - 1) * 4 + (isBossBattle ? 85 : 0);
   const scaledAttack = Math.max(1, Math.round(rawAttack * gameProfile.enemyAttackScale));
   maxEnemyHP = Math.max(40, Math.round(rawHP * gameProfile.enemyHpScale));
@@ -5566,10 +5849,14 @@ function loadNextEnemy() {
   document.getElementById("enemyFlavor").innerText = `${currentEnemy.flavor} ${getCurrentBiome().flavor}`;
   document.getElementById("enemyAttackText").innerText = `Enemy attack: ${enemyAttack}`;
   document.getElementById("enemyIntentText").innerText = getEnemyIntentText();
+  updateIntentChip();
   updateEnemyModel();
   updateBiomeTheme();
   document.getElementById("battleCount").innerText = battleCount;
   renderEnemyStats();
+  if (!currentEnemy.isBoss && battleCount > 1 && (battleCount - 1) % 5 === 0) {
+    showPhaseBanner("Checkpoint", `Battle ${battleCount} begins. The climb is getting harsher.`, "phase");
+  }
   if (currentEnemy.isBoss) {
     pulseBossWarning();
     showPhaseBanner("Boss Fight", `${currentEnemy.name} enters with ${nextEnemyMove.label}.`, "boss");
@@ -5599,6 +5886,7 @@ function updateHealthBars() {
 function resetCard(hideHint = true) {
   document.getElementById("playerCard").classList.remove("flip");
   document.getElementById("answer").value = "";
+  updateTurnOrder("Your Turn -> Solve and cast");
   if (hideHint) {
     document.getElementById("hintPanel").style.display = "none";
   }
@@ -5641,6 +5929,7 @@ function resetRun() {
   maxEnemyHP = currentEnemy.maxHP;
   enemyHP = maxEnemyHP;
   enemyAttack = currentEnemy.attack;
+  updateTurnOrder("Your Turn -> Solve and cast");
   if (embedEnemyConfig) {
     currentEnemy = { ...embedEnemyConfig, baseName: embedEnemyConfig.name, isBoss: false, phase: 1, baseBonusText: embedEnemyConfig.bonusText };
     maxEnemyHP = currentEnemy.maxHP;
@@ -5666,7 +5955,7 @@ function resetRun() {
   document.getElementById("milestonePanel").classList.remove("show");
   document.getElementById("relicPanel").classList.remove("show");
   if (embedMode) {
-    document.querySelector(".subtitle").innerText = "Full encounter mode. Dark fantasy spell duels with bosses, relics, evolved spells, and biome shifts.";
+    document.querySelector(".subtitle").innerText = "Areen Final Math encounter mode. Dark fantasy spell duels with bosses, relics, evolved spells, and biome shifts.";
   }
 
   renderEnemyStats();
@@ -5680,7 +5969,7 @@ updateGameDifficultyButtons();
   resetCard();
   updateHealthBars();
   generateQuestion();
-  setStatus(embedMode ? "Pick a level and solve to cast." : "Pick your settings, choose a level, and start the duel.");
+  setStatus(embedMode ? "Pick a level and solve to cast." : "Areen Final Math: pick your settings, choose a level, and start the duel.");
   setCombatFeed("The duel is ready.");
 }
 
@@ -5698,6 +5987,7 @@ document.getElementById("answer").addEventListener("keydown", (event) => {
   }
 });
 
+document.addEventListener("keydown", handleDevShortcut);
 document.getElementById("tutorialNext").addEventListener("click", nextTutorialStep);
 document.getElementById("tutorialSkip").addEventListener("click", () => closeTutorial(true));
 
@@ -5708,54 +5998,6 @@ if (!embedMode && localStorage.getItem("enzo4-tutorial-seen") !== "1") {
 </script>
 </body>
 </html>
-<!-- ===================== ENZO4 FULL FILE EMBED END ===================== -->
-</script>
-<script>
-/* ===================== ENZO4 INTEGRATION (PARTNER-SAFE) =====================
-   Edit this block if you need to change where/how ENZO4 opens.
-   This is isolated from the original ice-skate iframe game logic above.
-*/
-(function () {
-  var openBtn = document.getElementById('enzo4-launch-btn');
-  var closeBtn = document.getElementById('enzo4-close');
-  var modal = document.getElementById('enzo4-modal');
-  var enzoFrame = document.getElementById('enzo4-frame');
-  var enzoHtml = document.getElementById('enzo4-embedded-html').textContent;
-  if (!enzoFrame.getAttribute('src')) {
-    enzoFrame.srcdoc = enzoHtml;
-  }
-
-  function openEnzo4() {
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeEnzo4() {
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden', 'true');
-  }
-
-  openBtn.addEventListener('click', openEnzo4);
-  closeBtn.addEventListener('click', closeEnzo4);
-  window.__openEnzo4Modal = openEnzo4;
-
-  modal.addEventListener('click', function (ev) {
-    if (ev.target === modal) closeEnzo4();
-  });
-
-  window.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && modal.classList.contains('open')) {
-      closeEnzo4();
-    }
-  });
-
-  window.addEventListener('message', function (ev) {
-    var data = ev && ev.data;
-    if (!data || data.type !== 'open-enzo4') return;
-    openEnzo4();
-  });
-})();
-</script>
 <!-- ===================== ENZO4 INTEGRATION END ===================== -->
 
 
