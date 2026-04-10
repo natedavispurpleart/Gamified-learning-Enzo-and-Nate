@@ -5998,6 +5998,52 @@ if (!embedMode && localStorage.getItem("enzo4-tutorial-seen") !== "1") {
 </script>
 </body>
 </html>
+<!-- ===================== ENZO4 FULL FILE EMBED END ===================== -->
+</script>
+<script>
+/* ===================== ENZO4 INTEGRATION (PARTNER-SAFE) =====================
+   Edit this block if you need to change where/how ENZO4 opens.
+   This is isolated from the original ice-skate iframe game logic above.
+*/
+(function () {
+  var openBtn = document.getElementById('enzo4-launch-btn');
+  var closeBtn = document.getElementById('enzo4-close');
+  var modal = document.getElementById('enzo4-modal');
+  var enzoFrame = document.getElementById('enzo4-frame');
+  var enzoHtml = document.getElementById('enzo4-embedded-html').textContent;
+  if (!enzoFrame.getAttribute('src')) {
+    enzoFrame.srcdoc = enzoHtml;
+  }
+
+  function openEnzo4() {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeEnzo4() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  openBtn.addEventListener('click', openEnzo4);
+  closeBtn.addEventListener('click', closeEnzo4);
+  window.__openEnzo4Modal = openEnzo4;
+
+  modal.addEventListener('click', function (ev) {
+    if (ev.target === modal) closeEnzo4();
+  });
+
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && modal.classList.contains('open')) {
+      closeEnzo4();
+    }
+  });
+
+  window.addEventListener('message', function (ev) {
+    var data = ev && ev.data;
+    if (!data || data.type !== 'open-enzo4') return;
+    openEnzo4();
+  });
+})();
+</script>
 <!-- ===================== ENZO4 INTEGRATION END ===================== -->
-
-
